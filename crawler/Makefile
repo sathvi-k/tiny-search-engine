@@ -1,5 +1,10 @@
-CFLAGS= -Wall -pedantic -std=c11 –I<path-to-header-files> -L~/engs50/tse/lib -g
+CFLAGS=-Wall -pedantic -std=c11 -I../utils -L../lib -g
 LIBS=-lutils -lcurl
 
+all: clean crawler
+
 crawler:
-					gcc $(CFLAGS) crawler.c $LIBS -o $@
+				gcc $(CFLAGS) crawler.c $(LIBS) -o $@
+
+clean:
+				rm -f crawler

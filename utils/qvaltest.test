@@ -1,4 +1,0 @@
-#!/bin/bash
-
-echo "qtest:"                                                                 
-valgrind --leak-check=full qtest 2> >(grep -i "0 ERRORS")    
