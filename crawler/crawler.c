@@ -14,7 +14,26 @@
 #include <webpage.h>
 
 
+
 int main(void){
-	printf("hello");
-	exit(EXIT_SUCCESS);
+	webpage_t* page=webpage_new("https://thayer.github.io/engs50/", 0, NULL);
+	if(webpage_fetch(page)){
+		char *html=webpage_getHTML(page);
+		int pos = 0;
+		char *result;
+		while((pos=webpage_getNextURL(page,pos,&result)) > 0){
+			if (IsInternalURL()){
+				printf("Found internal url: %s\n", result);
+				free(result);
+			}
+			else{
+				printf("Found external url: %s\n", result);
+				free(result);
+			}
+		free(webpage_getHTML(page));
+	}
+	else{
+		exit(EXIT_FAILURE);
+	}
+	char page_html=webpage_getHTML("https://thayer.github.io/engs50/");
 }
