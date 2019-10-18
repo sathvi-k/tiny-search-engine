@@ -20,14 +20,10 @@ void print_anything(void *elementp){
 
 bool searchfn(void* elementp,const void* searchkeyp){                           
   webpage_t *wp2=(webpage_t*)elementp;                                                  
-  char *pikey;                                                                  
-  pikey = (char*)searchkeyp;                                                    
-  char *keystr=pikey;                                                           
+  char *urlP = (char*)searchkeyp;                                                    
   char *wp2url=webpage_getURL(wp2);                                                      
-  //printf("searchkeyp:%p\n",searchkeyp);                                       
-  //printf("keyval:%d\n",keyval);                                               
-  //printf("year:%d\n",cp2->year);                                              
-  if(strcmp(keystr,wp2url)==0){                                                
+  
+  if(strcmp(urlP,wp2url)==0){                                                
     return true;                                                                
   }                                                                             
   else{                                                                         
@@ -38,8 +34,7 @@ bool searchfn(void* elementp,const void* searchkeyp){
 int main(void){
 	webpage_t *page=webpage_new("https://thayer.github.io/engs50/", 0, NULL);
 	if(webpage_fetch(page)){
-		//char *html=webpage_getHTML(page);
-		int pos = 0;
+	     	int pos = 0;
 		char *result;
 		queue_t *webq=qopen();
 		hashtable_t *urlH=hopen(7);
@@ -48,9 +43,12 @@ int main(void){
 			if (IsInternalURL(result)){
 				printf("Found internal url: %s\n", result);
 				inter_page=webpage_new(result, 1, NULL);
-				if(hsearch(urlH,result){
+				if(hsearch(urlH,searchfn,result,sizeof(*result)){
 					qput(webq, (void*)inter_page);
-					
+					//TODO: change code for hash.c to just hold
+					//string values instead of having queues in each
+					//box of the hashtable
+					hput(urlH,(void*)?);
 				}
 				
 			}
