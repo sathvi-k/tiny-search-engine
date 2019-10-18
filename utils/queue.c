@@ -57,7 +57,7 @@ void qclose(queue_t *qp){
 	
 	while(i!=NULL){
 		save=i->next;
-		free(i->data);
+		//free(i->data);
 		free(i);
 		i=save;
 	}

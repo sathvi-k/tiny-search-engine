@@ -13,7 +13,10 @@
 #include <hash.h>
 #include <webpage.h>
 
-
+void print_anything(void *elementp){                                            
+  webpage_t *wp=(webpage_t*)elementp;
+  printf("URL: %s\n", webpage_getURL(wp));
+} 
 
 int main(void){
 	webpage_t *page=webpage_new("https://thayer.github.io/engs50/", 0, NULL);
@@ -21,15 +24,23 @@ int main(void){
 		//char *html=webpage_getHTML(page);
 		int pos = 0;
 		char *result;
+		queue_t *webq=qopen();
+		webpage_t* inter_page;
 		while((pos=webpage_getNextURL(page,pos,&result)) > 0){
 			if (IsInternalURL(result)){
 				printf("Found internal url: %s\n", result);
+				inter_page=webpage_new(result, 1, NULL);
+        qput(webq, (void*)inter_page);
 			}
 			else{
 				printf("Found external url: %s\n", result);
 			}
 			free(result);
 		}
+		qapply(webq,print_anything);
+		qapply(webq,webpage_delete);
+		qclose(webq);
+		//		inter_page=NULL;
 	}
 	else{
 		exit(EXIT_FAILURE);
