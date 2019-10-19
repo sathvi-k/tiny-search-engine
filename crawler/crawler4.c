@@ -41,10 +41,10 @@ int main(void){
 	if(webpage_fetch(page)){
 		int pos = 0;
 		//		const char *wa;
-		char *result;
+		char *result=NULL;
 		queue_t *webq=qopen();
 		hashtable_t *urlH=hopen(7);
-		webpage_t* inter_page;
+		webpage_t* inter_page=NULL;
 		while((pos=webpage_getNextURL(page,pos,&result)) > 0){
 			if (IsInternalURL(result)){
 				printf("Found internal url: %s\n", result);
@@ -54,9 +54,9 @@ int main(void){
 					hput(urlH,(void*)inter_page, wa, sizeof(*wa));
 					qput(webq,(void*)inter_page);
 				}
-				else{
-					free(inter_page);
-				}
+				//				else{
+				//	free(inter_page);
+				//}
 			}
 			else{
 				printf("Found external url: %s\n", result);
@@ -67,11 +67,12 @@ int main(void){
 		qapply(webq,webpage_delete);
 		qclose(webq);
 		hclose(urlH);
+       		webpage_delete(inter_page);
 		//		inter_page=NULL;
 	}
 	else{
 		exit(EXIT_FAILURE);
 	}
-	webpage_delete(page);
+       	webpage_delete(page);
 	exit(EXIT_SUCCESS);
 }
