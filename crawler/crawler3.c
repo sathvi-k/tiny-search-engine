@@ -23,14 +23,15 @@ int main(void){
 	if(webpage_fetch(page)){
 		//char *html=webpage_getHTML(page);
 		int pos = 0;
-		char *result;
+		char *result=NULL;
 		queue_t *webq=qopen();
 		webpage_t* inter_page;
 		while((pos=webpage_getNextURL(page,pos,&result)) > 0){
+		  
 			if (IsInternalURL(result)){
 				printf("Found internal url: %s\n", result);
 				inter_page=webpage_new(result, 1, NULL);
-        qput(webq, (void*)inter_page);
+				qput(webq, (void*)inter_page);
 			}
 			else{
 				printf("Found external url: %s\n", result);
