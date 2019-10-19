@@ -29,11 +29,14 @@ int main(void){
 				printf("Found external url: %s\n", result);
 			}
 			free(result);
+			result=NULL;
 		}
 	}
 	else{
 		exit(EXIT_FAILURE);
 	}
 	webpage_delete(page);
+	page=NULL;
+	
 	exit(EXIT_SUCCESS);
 }

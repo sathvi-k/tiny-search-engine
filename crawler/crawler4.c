@@ -40,39 +40,57 @@ int main(void){
 	webpage_t *page=webpage_new("https://thayer.github.io/engs50/", 0, NULL);
 	if(webpage_fetch(page)){
 		int pos = 0;
+		
 		//		const char *wa;
 		char *result=NULL;
+		
 		queue_t *webq=qopen();
-		hashtable_t *urlH=hopen(7);
+		hashtable_t *urlH=hopen(10);
+		
 		webpage_t* inter_page=NULL;
+		
 		while((pos=webpage_getNextURL(page,pos,&result)) > 0){
+			
 			if (IsInternalURL(result)){
+				
 				printf("Found internal url: %s\n", result);
-				inter_page=webpage_new(result, 1, NULL);
+				inter_page=webpage_new(result, pos, NULL);
+				
 				if(hsearch(urlH,searchfn,result,sizeof(*result))==NULL){
 					const char *wa=webpage_getURL(inter_page);
 					hput(urlH,(void*)inter_page, wa, sizeof(*wa));
 					qput(webq,(void*)inter_page);
 				}
-				//				else{
-				//	free(inter_page);
-				//}
+				
+				//delete(free) created webpage_t if it is a duplicate
+				else{
+					webpage_delete(inter_page);
+					inter_page=NULL;
+				}
+				
 			}
 			else{
 				printf("Found external url: %s\n", result);
 			}
 			free(result);
+			result=NULL;
 		}
 		qapply(webq,print_anything);
 		qapply(webq,webpage_delete);
-		qclose(webq);
 		hclose(urlH);
-       		webpage_delete(inter_page);
-		//		inter_page=NULL;
+		qclose(webq);
+		
+		//webpage_delete(inter_page); This was because the webpage_t
+		//struct that had the duplicate URL was not being deleted in the
+		//qapply method. It is no longer needed now that we have an else statement to do the deleting.
+		
 	}
+	
 	else{
 		exit(EXIT_FAILURE);
 	}
-       	webpage_delete(page);
+	webpage_delete(page);
+	page=NULL;
+	
 	exit(EXIT_SUCCESS);
 }

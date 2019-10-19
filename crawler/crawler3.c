@@ -30,22 +30,24 @@ int main(void){
 		  
 			if (IsInternalURL(result)){
 				printf("Found internal url: %s\n", result);
-				inter_page=webpage_new(result, 1, NULL);
+				inter_page=webpage_new(result, pos, NULL);
 				qput(webq, (void*)inter_page);
 			}
 			else{
 				printf("Found external url: %s\n", result);
 			}
 			free(result);
+			result=NULL;
 		}
 		qapply(webq,print_anything);
 		qapply(webq,webpage_delete);
 		qclose(webq);
-		//		inter_page=NULL;
 	}
 	else{
 		exit(EXIT_FAILURE);
 	}
 	webpage_delete(page);
+	page=NULL;
+	
 	exit(EXIT_SUCCESS);
 }
