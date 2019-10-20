@@ -1,7 +1,7 @@
 CFLAGS=-Wall -pedantic -std=c11 -I../utils -L../lib -g
 LIBS=-lutils -lcurl
 
-all: clean crawler crawler3 crawler4 crawler5
+all: clean crawler crawler3 crawler4 crawler5 crawlerf
 
 crawler:
 				gcc $(CFLAGS) crawler.c $(LIBS) -o $@
@@ -15,5 +15,8 @@ crawler4:
 crawler5:
 				gcc $(CFLAGS) crawler5.c $(LIBS) -o $@
 
+crawlerf:
+				gcc $(CFLAGS) crawlerf.c $(LIBS) -o $@
+
 clean:
-				rm -f crawler crawler3 crawler4 crawler5
+				rm -f crawler crawler3 crawler4 crawler5 crawlerf
