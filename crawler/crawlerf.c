@@ -136,40 +136,41 @@ int main(int argc,char *argv[]){
 							printf("Found internal url: %s\n", result);                                                                                     
 							inter_page=webpage_new(result,depthtracker, NULL);
 							
-							if(webpage_fetch(inter_page)){ ///fetch before pagesave or error will occur
-								
-								if(hsearch(urlH,searchfn,result,sizeof(*result))==NULL){                                                                        
-									const char *wa=webpage_getURL(inter_page);                                                                                    
-									hput(urlH,(void*)inter_page, wa, sizeof(*wa));                                                                                
-									qput(webq,(void*)inter_page);
-									pagesave(inter_page,id,pagedir);  //create a save file
-									id=id+1;
-								}                                                                                                                               
-								
-								//delete(free) created webpage_t if it is a duplicate                                                                          
-								else{                                                                                                                          
-									webpage_delete(inter_page);                                                                                                  
+							//	if(webpage_fetch(inter_page)){ ///fetch before pagesave or error will occur
+							
+							if(hsearch(urlH,searchfn,result,sizeof(*result))==NULL){                                                                        
+								const char *wa=webpage_getURL(inter_page);                                                                                    
+								hput(urlH,(void*)inter_page, wa, sizeof(*wa));
+								if(webpage_fetch(inter_page)){
+								qput(webq,(void*)inter_page);
+								pagesave(inter_page,id,pagedir);  //create a save file
+								id=id+1;
+								}
+								else{
+									webpage_delete(inter_page);
 									inter_page=NULL;
 								}
-							}
-							else{
-								webpage_delete(inter_page);
+							}                                                                                                                               
+							
+							//delete(free) created webpage_t if it is a duplicate                                                                          
+							else{                                                                                                                          
+								webpage_delete(inter_page);                                                                                                  
 								inter_page=NULL;
 							}
-						}                                                                                                                                 
-						else{                                                                                                                             
-							printf("Found external url: %s\n", result);                                                                                     
-						}                                                                                                                                 
-						free(result);                                                                                                                     
-						result=NULL;                                                                                                                      
+						}            
+						else{                                                                                                            
+							printf("Found external url: %s\n", result);                                                                             
+						}                                                                                                                  
+						free(result);                                                                                                        
+						result=NULL;                                                                                                              
 					}
-					webpage_delete(page);                                                                                                                 
-					page=NULL;		                                                                                                                         
+					//	webpage_delete(page);                                                                                                                 
+					//page=NULL;		                                                                                                                         
 				}
-				else{
-					webpage_delete(page);
-					page=NULL;
-				}
+				
+				//webpage_delete(page);
+				//page=NULL;
+				
 			}
 			qclose(webq);
 			hclose(urlH);
