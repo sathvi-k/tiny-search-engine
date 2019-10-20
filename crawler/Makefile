@@ -16,4 +16,4 @@ crawler5:
 				gcc $(CFLAGS) crawler5.c $(LIBS) -o $@
 
 clean:
-				rm -f crawler crawler3 crawler4
+				rm -f crawler crawler3 crawler4 crawler5
