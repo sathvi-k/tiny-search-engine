@@ -104,7 +104,9 @@ int main(int argc,char *argv[]){
 			//then save it in a file
 			webpage_t *page=webpage_new(url,0,NULL);
 			
-			const char *seedurl=webpage_getURL(page);                                                                                
+			char seedurl[100];
+			strcpy(seedurl,webpage_getURL(page));
+			
 			hput(urlH,(void*)seedurl, seedurl, sizeof(*seedurl));
 			qput(webq,(void*)page);
 			
@@ -133,7 +135,10 @@ int main(int argc,char *argv[]){
 								if(hsearch(urlH,searchfn,result,sizeof(*result))==NULL){
 									
 									inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
-									const char *wa=webpage_getURL(inter_page);                                                                                  	
+
+									char wa[100];
+									strcpy(wa,webpage_getURL(inter_page));
+									
 									hput(urlH,(void*)wa, wa, sizeof(*wa));
 									qput(webq,(void*)inter_page);	
 								}
