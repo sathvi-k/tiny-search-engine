@@ -24,11 +24,10 @@ void print_anything(void *elementp){
 }
 
 bool searchfn(void* elementp,const void* searchkeyp){                     
-  webpage_t *wp2=(webpage_t*)elementp;                                     
+  char *wp2=(char*)elementp;                                     
   char *urlP = (char*)searchkeyp;                                          
-  char *wp2url=webpage_getURL(wp2);                                        
-  
-  if(strcmp(urlP,wp2url)==0){                                              
+                                          
+  if(strcmp(urlP,wp2)==0){                                              
     return true;                                                           
   }
 	
@@ -86,82 +85,71 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
 
 
 int main(int argc,char *argv[]){
-
+	
 	if(argc==4){
 		//gotten from arguments
 		char *url=argv[1];
 		char *pagedir=argv[2];
 		int maxdepth=atoi(argv[3]); 
-
+		
 		//track ID and depth
 		int id=1;
-		int depthtracker=0;
-
+		
 		//check if provided depth is greater than or equal to 1
 		if(maxdepth>=0){
 			queue_t *webq=qopen();                                                                                                             
 			hashtable_t *urlH=hopen(20);
-
+			
 			// create webpage, put it in a queue and the URL in hash
 			//then save it in a file
-			webpage_t *page=webpage_new(url,depthtracker,NULL);
+			webpage_t *page=webpage_new(url,0,NULL);
 			
-			if(webpage_fetch(page)){
-				const char *seedurl=webpage_getURL(page);                                                                                    
-				hput(urlH,(void*)page, seedurl, sizeof(*seedurl));
-				qput(webq,(void*)page);
-				pagesave(page,id,pagedir);
-				id=id+1;
-			}
-			else{
-					exit(EXIT_FAILURE);
-			}
-
+			const char *seedurl=webpage_getURL(page);                                                                                
+			hput(urlH,(void*)seedurl, seedurl, sizeof(*seedurl));
+			qput(webq,(void*)page);
+			
+			
 			//check if queue if empty if not carry on
 			while((page=qget(webq))!=NULL){
-
-				//check if depth exceeds the max depth if not carry on
-				if(webpage_getDepth(page)<maxdepth){
+				
+				if(webpage_fetch(page)){
 					
-					depthtracker=depthtracker+1;
-					
-					int pos = 0;
-					char *result=NULL;
-					webpage_t* inter_page=NULL;                                                                                                         
-					
-					while((pos=webpage_getNextURL(page,pos,&result)) > 0){
+					//check if depth exceeds the max depth if not carry on
+					if(webpage_getDepth(page)<=maxdepth){
 						
-						if (IsInternalURL(result)){                                                                                                       
+						pagesave(page,id,pagedir);
+						id=id+1;
+						
+						int pos = 0;
+						char *result=NULL;
+						webpage_t* inter_page=NULL;                                                                                                         
+						
+						while((pos=webpage_getNextURL(page,pos,&result)) > 0){
 							
-							printf("Found internal url: %s\n", result);                                                                                     
-							
+							if(IsInternalURL(result)){                                                                                                       
 								
-							if(hsearch(urlH,searchfn,result,sizeof(*result))==NULL){
-								inter_page=webpage_new(result,depthtracker, NULL);
-								const char *wa=webpage_getURL(inter_page);                                                                                    
-
-								hput(urlH,(void*)inter_page, wa, sizeof(*wa));
+								printf("Found internal url: %s\n", result);
 								
-								if(webpage_fetch(inter_page)){
-									qput(webq,(void*)inter_page);
-									pagesave(inter_page,id,pagedir);  //create a save file
-									id=id+1;
+								if(hsearch(urlH,searchfn,result,sizeof(*result))==NULL){
+									
+									inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
+									const char *wa=webpage_getURL(inter_page);                                                                                  	
+									hput(urlH,(void*)wa, wa, sizeof(*wa));
+									qput(webq,(void*)inter_page);	
 								}
-								else{
-									webpage_delete(inter_page);
-									inter_page=NULL;
-								}
+								
 							}                                                                                                                   
-						}            
-						else{                                                                                                            
-							printf("Found external url: %s\n", result);                                                                             
-						}                                                                                                                  
-						free(result);                                                                                                        
-						result=NULL;                                                                                                              
-					}		                                                                                                                         
+							else{                                                                                                            
+								printf("Found external url: %s\n", result);                                                                      
+							}
+							
+							free(result);                                                                                                        
+							result=NULL;                                                                                                        
+						}		                                                                                                                  
+					}
 				}
-				//webpage_delete(page);
-				//page=NULL;
+				webpage_delete(page);
+				page=NULL;
 			}
 			qclose(webq);
 			hclose(urlH);
