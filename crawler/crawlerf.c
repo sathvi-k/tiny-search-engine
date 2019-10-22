@@ -106,9 +106,8 @@ int main(int argc,char *argv[]){
 			
 			char seedurl[1000];
 			strcpy(seedurl,webpage_getURL(page));
-			const char *surl=seedurl;
 			
-			hput(urlH,(void*)surl, surl, sizeof(*surl));
+			hput(urlH,(void*)seedurl, seedurl, strlen(seedurl));
 			qput(webq,(void*)page);
 			
 			
@@ -119,8 +118,6 @@ int main(int argc,char *argv[]){
 					
 					//check if depth exceeds the max depth if not carry on
 					if(webpage_getDepth(page)<=maxdepth){
-
-						printf("saved:%s\n",webpage_getURL(page));
 						
 						pagesave(page,id,pagedir);
 						id=id+1;
@@ -133,17 +130,16 @@ int main(int argc,char *argv[]){
 							
 							if(IsInternalURL(result)){                                                                                                       
 								
-								//printf("Found internal url: %s\n", result);
 								
-								if(hsearch(urlH,searchfn,result,sizeof(*result))==NULL){
-									
+								char cresult[1000];
+								strcpy(cresult,result);
+								printf("Found internal url: %s\n",cresult);
+								
+								if(hsearch(urlH,searchfn,cresult,strlen(cresult))==NULL){
+									printf("queued:%s\n",cresult);
 									inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
 
-									char inturl[1000];
-									strcpy(inturl,result);
-									const char *iurl=inturl;
-									
-									hput(urlH,(void*)iurl, iurl, sizeof(*iurl));
+									hput(urlH,(void*)cresult, cresult, strlen(cresult));
 									qput(webq,(void*)inter_page);	
 								}
 								
