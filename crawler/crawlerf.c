@@ -28,10 +28,11 @@ void print_url(void *url){
 }
 
 bool searchfn(void* elementp,const void* searchkeyp){                     
-  char *wp2=(char*)elementp;                                     
+  webpage_t *wp2=(webpage_t*)elementp;                                     
   char *urlP = (char*)searchkeyp;                                          
-                                          
-  if(strcmp(urlP,wp2)==0){                                              
+  char *wp2url=webpage_getURL(wp2);
+	
+  if(strcmp(urlP,wp2url)==0){                                              
     return true;                                                           
   }
 	
@@ -109,10 +110,7 @@ int main(int argc,char *argv[]){
 			//then save it in a file
 			webpage_t *page=webpage_new(url,0,NULL);
 			
-			char seedurl[100];
-			sprintf(seedurl,"%s",webpage_getURL(page));
-			
-			hput(urlH,(void*)seedurl,seedurl,strlen(seedurl));
+			hput(urlH,(void*)page,url,strlen(url));
 			qput(webq,(void*)page);
 					
 			//check if queue if empty if not carry on
@@ -136,37 +134,30 @@ int main(int argc,char *argv[]){
 								
 								inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
 								
-								char hurl[100];
-								sprintf(hurl,"%s",webpage_getURL(inter_page));
 								//printf("Found internal url: %s\n",hurl);
-								//happly(urlH, print_url);
-								//printf("hsreturn: %s\n", (char*)hsearch(urlH,searchfn,hurl,strlen(hurl)));
-					 
-								if(hsearch(urlH,searchfn,hurl,strlen(hurl))==NULL){
-									printf("queued:%s\n",hurl);
+								
+								if(hsearch(urlH,searchfn,result,strlen(result))==NULL){
 									
-									hput(urlH,(void*)hurl,hurl,strlen(hurl));
+									hput(urlH,(void*)inter_page,result,strlen(result));
 									qput(webq,(void*)inter_page);
-
-									free(result);
-							    result=NULL;
 								}
+								
 								else{
 									webpage_delete(inter_page);
 									inter_page=NULL;
 								}
 							}                                                                                                                   
 							else{                                                                                                            
-								//	printf("Found external url: %s\n", result);                                                                      
+								//	printf("Found external url: %s\n", result);
 							}
-							
+							free(result);
+							result=NULL;
 						}
 					}
 				}
-				webpage_delete(page);
-				page=NULL;
-			}
+			}	
 			qclose(webq);
+			happly(urlH,webpage_delete);
 			hclose(urlH);
 			exit(EXIT_SUCCESS);
 		}
@@ -181,7 +172,7 @@ int main(int argc,char *argv[]){
 	}
 }
 
-
+	
 
 
 
