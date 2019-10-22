@@ -90,7 +90,7 @@ int main(void){
 	webpage_t *page=webpage_new("https://thayer.github.io/engs50/", 0, NULL);
 	
 	if(webpage_fetch(page)){
-	  printf("return of pagedsave: %d\n",pagesave(page,1,"pages"));
+	  printf("value returned from pagesave function: %d\n",pagesave(page,1,"pages"));
 	}
 	else{
 		exit(EXIT_FAILURE);

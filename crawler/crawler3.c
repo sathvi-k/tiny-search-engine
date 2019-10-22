@@ -39,6 +39,7 @@ int main(void){
 			free(result);
 			result=NULL;
 		}
+		printf("Printing from Queue:\n");
 		qapply(webq,print_anything);
 		qapply(webq,webpage_delete);
 		qclose(webq);
