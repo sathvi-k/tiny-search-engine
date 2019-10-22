@@ -23,6 +23,10 @@ void print_anything(void *elementp){
   printf("URL: %s\n", webpage_getURL(wp));
 }
 
+void print_url(void *url){
+	printf("url: %s\n", (char*)url);
+}
+
 bool searchfn(void* elementp,const void* searchkeyp){                     
   char *wp2=(char*)elementp;                                     
   char *urlP = (char*)searchkeyp;                                          
@@ -97,20 +101,20 @@ int main(int argc,char *argv[]){
 		
 		//check if provided depth is greater than or equal to 1
 		if(maxdepth>=0){
-			queue_t *webq=qopen();                                                                                                             
+			
+			queue_t *webq=qopen();                                                                                                            
 			hashtable_t *urlH=hopen(20);
 			
 			// create webpage, put it in a queue and the URL in hash
 			//then save it in a file
 			webpage_t *page=webpage_new(url,0,NULL);
 			
-			char seedurl[1000];
-			strcpy(seedurl,webpage_getURL(page));
+			char seedurl[100];
+			sprintf(seedurl,"%s",url);
 			
-			hput(urlH,(void*)seedurl, seedurl, strlen(seedurl));
+			hput(urlH,(void*)seedurl,seedurl,strlen(seedurl));
 			qput(webq,(void*)page);
-			
-			
+					
 			//check if queue if empty if not carry on
 			while((page=qget(webq))!=NULL){
 				
@@ -123,34 +127,37 @@ int main(int argc,char *argv[]){
 						id=id+1;
 						
 						int pos = 0;
-						char *result=NULL;
-						webpage_t* inter_page=NULL;                                                                                                         
+						char *result;
+						webpage_t* inter_page=NULL;
 						
 						while((pos=webpage_getNextURL(page,pos,&result)) > 0){
 							
-							if(IsInternalURL(result)){                                                                                                       
+							char hurl[100];
+							sprintf(hurl,"%s",result);
+							if(IsInternalURL(result)){
 								
 								
-								char cresult[1000];
-								strcpy(cresult,result);
-								printf("Found internal url: %s\n",cresult);
-								
-								if(hsearch(urlH,searchfn,cresult,strlen(cresult))==NULL){
-									printf("queued:%s\n",cresult);
-									inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
+								//printf("Found internal url: %s\n",hurl);
 
-									hput(urlH,(void*)cresult, cresult, strlen(cresult));
-									qput(webq,(void*)inter_page);	
+								//happly(urlH, print_url);
+								//printf("hsreturn: %s\n", (char*)hsearch(urlH,searchfn,hurl,strlen(hurl)));
+					 
+								if(hsearch(urlH,searchfn,hurl,strlen(hurl))==NULL){
+									printf("queued:%s\n",result);
+									inter_page=webpage_new(hurl,(webpage_getDepth(page))+1, NULL);
+									
+									hput(urlH,(void*)hurl,hurl,strlen(hurl));
+									qput(webq,(void*)inter_page);
+
+									free(result);
+							    result=NULL;
 								}
-								
 							}                                                                                                                   
 							else{                                                                                                            
 								//	printf("Found external url: %s\n", result);                                                                      
 							}
 							
-							free(result);                                                                                                        
-							result=NULL;                                                                                                        
-						}		                                                                                                                  
+						}
 					}
 				}
 				webpage_delete(page);
