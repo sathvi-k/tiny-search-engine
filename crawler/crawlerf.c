@@ -110,7 +110,7 @@ int main(int argc,char *argv[]){
 			webpage_t *page=webpage_new(url,0,NULL);
 			
 			char seedurl[100];
-			sprintf(seedurl,"%s",url);
+			sprintf(seedurl,"%s",webpage_getURL(page));
 			
 			hput(urlH,(void*)seedurl,seedurl,strlen(seedurl));
 			qput(webq,(void*)page);
@@ -132,25 +132,28 @@ int main(int argc,char *argv[]){
 						
 						while((pos=webpage_getNextURL(page,pos,&result)) > 0){
 							
-							char hurl[100];
-							sprintf(hurl,"%s",result);
 							if(IsInternalURL(result)){
 								
+								inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
 								
+								char hurl[100];
+								sprintf(hurl,"%s",webpage_getURL(inter_page));
 								//printf("Found internal url: %s\n",hurl);
-
 								//happly(urlH, print_url);
 								//printf("hsreturn: %s\n", (char*)hsearch(urlH,searchfn,hurl,strlen(hurl)));
 					 
 								if(hsearch(urlH,searchfn,hurl,strlen(hurl))==NULL){
-									printf("queued:%s\n",result);
-									inter_page=webpage_new(hurl,(webpage_getDepth(page))+1, NULL);
+									printf("queued:%s\n",hurl);
 									
 									hput(urlH,(void*)hurl,hurl,strlen(hurl));
 									qput(webq,(void*)inter_page);
 
 									free(result);
 							    result=NULL;
+								}
+								else{
+									webpage_delete(inter_page);
+									inter_page=NULL;
 								}
 							}                                                                                                                   
 							else{                                                                                                            
