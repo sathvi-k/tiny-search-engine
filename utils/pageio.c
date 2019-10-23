@@ -51,3 +51,40 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
   fclose(my_file);
   return 0;
 }
+
+/*                                                                             
+ * pageload -- loads the numbered filename <id> in direcory <dirnm>            
+ * into a new webpage                                                          
+ *                                                                             
+ * returns: non-NULL for success; NULL otherwise                               
+ */                                                                            
+webpage_t *pageload(int id, char *dirnm){
+	webpage_t *wp;
+	char dir_path[50];
+  char *path= "../";
+  sprintf(dir_path,"%s%s",path,dirnm);
+	char file_path[50];
+  sprintf(file_path,"%s/%d",dir_path,id);
+  FILE *my_file = fopen(file_path, "r");
+	if (my_file==NULL){
+		return NULL;
+	}
+	//reading from file
+	char url[30];
+	int depth;
+	int html_length;
+	fscanf(my_file, "%s %d %d", url, &depth, &html_length);
+
+	printf("URL %s\n", url);
+	printf("Depth %d\n", depth);
+	printf("HTML Length %d\n", html_length);
+
+	fclose(my_file);
+
+	wp=webpage_new(url,depth,NULL);
+	if (webpage_fetch(wp)){
+		printf("fetchedhtml\n");
+	}
+	return wp;
+	// return pointer to webpage object created
+}
