@@ -75,16 +75,11 @@ webpage_t *pageload(int id, char *dirnm){
 	int html_length;
 	fscanf(my_file, "%s %d %d", url, &depth, &html_length);
 
-	printf("URL %s\n", url);
-	printf("Depth %d\n", depth);
-	printf("HTML Length %d\n", html_length);
-
 	fclose(my_file);
 
 	wp=webpage_new(url,depth,NULL);
-	if (webpage_fetch(wp)){
-		printf("fetchedhtml\n");
+	if (!webpage_fetch(wp)){
+		return NULL;
 	}
 	return wp;
-	// return pointer to webpage object created
 }
