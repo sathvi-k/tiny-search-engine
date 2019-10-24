@@ -1,4 +1,4 @@
-/* indexer.c --- 
+/* indexer3.c --- 
  * 
  * 
  * Author: Sathvika R. Korandla
@@ -24,12 +24,12 @@ typedef struct nwordc{
   char *norm_word;
   int count;
 }nwordc_t;
-
-int get_count(void *elementp){
+/*
+void get_count(void *elementp){
   nwordc_t *wrdp=(nwordc_t*)elementp;
-  int num=wrdp->count;
+  void num=(void)(wrdp->count);
   return num;
-}
+  }*/
 
 bool searchfn(void* elementp,const void* searchkeyp){
   nwordc_t *wrdp2=(nwordc_t*)elementp;
@@ -99,14 +99,18 @@ int main(void){
       //if there IS word object in the hashtable with
       //its norm_word attribute equal to the value of "word" variable
       else{
-	nwordc_t hword=(nwordc_t*) hsearch(wordH,searchfn,word,strlen(word));
+	nwordc_t *hword=(nwordc_t*) hsearch(wordH,searchfn,word,strlen(word));
 	hword->count+=1;
       }
     }
     free(word);
   }
   int sum=0;
-  sum+=happly(wordH,get_count);
+  for (int i=0; i<150; i++){
+    nwordc_t *word_obj=(nwordc_t*)qget(wordH->qtable[i]);
+    sum+=word_obj->count;
+  }
+  printf("sum: %d",sum);
   hclose(wordH);
   webpage_delete(loaded);
   loaded=NULL;
