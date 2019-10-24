@@ -16,6 +16,7 @@
 #include <sys/stat.h>
 #include <webpage.h>
 #include <pageio.h>
+#include <ctype.h>
 
 /* NormalizeWord()
  *
@@ -24,14 +25,22 @@
  */
 
 char* NormalizeWord(char *word){
-	char *word=word;
-	char *normalized;
-
-	if (isalpha(word)){
-		if numeric value, hens
-	}
-	
+  char word_a[30];
+  strcpy(word_a,word);
+  char *normalized=NULL;  
+  int p=strlen(word_a);
+  if (p>=3){
+    for (int i=0; i<p; i++){
+      if (isalpha(word_a[i])!=0){
+	word_a[i]=tolower(word_a[i]);
+      }
+      else{
 	return normalized;
+      }
+    }
+    strcpy(normalized,word_a);
+  }
+  return normalized;
 }
 
 
@@ -42,9 +51,10 @@ int main(void){
 	int pos=0;
 	char *word;
 	while((pos=webpage_getNextWord(loaded,pos,&word))>0){
-		printf("%s\n",word);
-		free(word);
+	  if (NormalizeWord(word)!=NULL){
+	    printf("%s\n",word);
+	  }
+	  free(word);
 	}
-	
 	return 0;
 }
