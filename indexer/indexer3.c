@@ -20,16 +20,19 @@
 #include <queue.h>
 #include <hash.h>
 
+//global variable
+//need it to calculate a sum of all counts of words in a hashtable 
+int sum=0;
+
 typedef struct nwordc{
   char *norm_word;
   int count;
 }nwordc_t;
-/*
-void get_count(void *elementp){
+
+void all_counts(void *elementp){
   nwordc_t *wrdp=(nwordc_t*)elementp;
-  void num=(void)(wrdp->count);
-  return num;
-  }*/
+  sum+=wrdp->count;
+}
 
 bool searchfn(void* elementp,const void* searchkeyp){
   nwordc_t *wrdp2=(nwordc_t*)elementp;
@@ -90,7 +93,7 @@ int main(void){
       w_obj->norm_word=word;
       w_obj->count=0;
   
-      //if there's NO word object with the norm_word=word, put this object into
+      //if there's NO word object in the hashtable with the norm_word=word, put this object into
       //the hashtable
       if (hsearch(wordH,searchfn,word,strlen(word))==NULL){	
 	w_obj->count=1;
@@ -105,14 +108,17 @@ int main(void){
     }
     free(word);
   }
-  int sum=0;
+  
+  happly(wordH,all_counts);
+  /*
   for (int i=0; i<150; i++){
     nwordc_t *word_obj=(nwordc_t*)qget(wordH->qtable[i]);
     sum+=word_obj->count;
-  }
+    }*/
   printf("sum: %d",sum);
   hclose(wordH);
   webpage_delete(loaded);
   loaded=NULL;
   exit(EXIT_SUCCESS);
 }
+
