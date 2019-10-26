@@ -89,7 +89,7 @@ int main(void){
     if (NormalizeWord(word)!=NULL){
       //printf("%s\n",word);
 
-      nwordc_t *w_obj;
+      nwordc_t *w_obj = malloc(sizeof(*w_obj));
       w_obj->norm_word=word;
       w_obj->count=0;
   
