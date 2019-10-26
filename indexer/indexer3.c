@@ -115,7 +115,7 @@ int main(void){
     nwordc_t *word_obj=(nwordc_t*)qget(wordH->qtable[i]);
     sum+=word_obj->count;
     }*/
-  printf("sum: %d",sum);
+  printf("sum: %d\n",sum);
   hclose(wordH);
   webpage_delete(loaded);
   loaded=NULL;
