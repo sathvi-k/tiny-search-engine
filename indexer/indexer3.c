@@ -30,8 +30,19 @@ typedef struct nwordc{
 }nwordc_t;
 
 void all_counts(void *elementp){
-  nwordc_t *wrdp=(nwordc_t*)elementp;
+  nwordc_t *wrdp=elementp;
   sum+=wrdp->count;
+}
+
+void word_delete(void *data)
+{
+  nwordc_t *nword = data;
+  if (nword != NULL) {
+    if (nword->norm_word) {
+			free(nword->norm_word);
+    }
+    free(nword);
+  }
 }
 
 bool searchfn(void* elementp,const void* searchkeyp){
@@ -54,11 +65,6 @@ bool searchfn(void* elementp,const void* searchkeyp){
  */
 
 char* NormalizeWord(char *word){
-  /* char word_a[30];
-  strcpy(word_a,word);
-  char *normalized=(char *)calloc(1, strlen(word_a) + 1);
-  */
-
   char *normalized=NULL;
   int p=strlen(word);
   if (p>=3){
@@ -83,13 +89,11 @@ int main(void){
 
   int pos=0;
   char *word;
-
   hashtable_t *wordH=hopen(150);
   while((pos=webpage_getNextWord(loaded,pos,&word))>0){
     if (NormalizeWord(word)!=NULL){
       //printf("%s\n",word);
-
-      nwordc_t *w_obj = malloc(sizeof(*w_obj));
+			nwordc_t *w_obj = malloc(sizeof(*w_obj));
       w_obj->norm_word=word;
       w_obj->count=0;
   
@@ -104,22 +108,19 @@ int main(void){
       else{
 	nwordc_t *hword=(nwordc_t*) hsearch(wordH,searchfn,word,strlen(word));
 	hword->count+=1;
-	free(w_obj);
+	//	free(w_obj);
       }
+			free(w_obj);
     }
     free(word);
+		word=NULL;
   }
   
   happly(wordH,all_counts);
-  /*
-  for (int i=0; i<150; i++){
-    nwordc_t *word_obj=(nwordc_t*)qget(wordH->qtable[i]);
-    sum+=word_obj->count;
-    }*/
   printf("sum: %d\n",sum);
-  hclose(wordH);
+	//	happly(wordH,word_delete);
+	hclose(wordH);
   webpage_delete(loaded);
   loaded=NULL;
   exit(EXIT_SUCCESS);
 }
-
