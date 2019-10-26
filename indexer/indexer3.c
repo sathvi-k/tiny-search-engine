@@ -104,6 +104,7 @@ int main(void){
       else{
 	nwordc_t *hword=(nwordc_t*) hsearch(wordH,searchfn,word,strlen(word));
 	hword->count+=1;
+	free(w_obj);
       }
     }
     free(word);
