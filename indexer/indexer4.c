@@ -1,4 +1,4 @@
-/* indexer3.c --- 
+/* indexer4.c --- 
  * 
  * 
  * Author: Sathvika R. Korandla
@@ -25,7 +25,6 @@
 int sum=0;
 
 typedef struct nwordc{
-  // ?: Why not string pointer?
   char norm_word[100];
   int count;
 }nwordc_t;
@@ -99,11 +98,6 @@ int main(void){
       //the hashtable
       if (hsearch(wordH,searchfn,word,strlen(word))==NULL){
 				nwordc_t *w_obj =(nwordc_t*)malloc(sizeof(nwordc_t));
-				//?: I understand that strcpy is a
-				//right way to make one string equal
-				//to another, but I'm wondering though
-				//why regular assignment through "="
-				//don't work
 				strcpy(w_obj->norm_word,word);
 				w_obj->count=1;
 				hput(wordH,(void*)w_obj,word,strlen(word));
@@ -122,7 +116,6 @@ int main(void){
   
   happly(wordH,all_counts);
   printf("sum: %d\n",sum);
-  // ?: How did print_index function help you debug?
 	happly(wordH,print_index);
 	
 	happly(wordH,word_delete);
