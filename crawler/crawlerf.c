@@ -101,6 +101,8 @@ int main(int argc,char *argv[]){
 					//check if depth exceeds the max depth if not carry on
 					if(webpage_getDepth(page)<=maxdepth){
 						pagesave(page,id,pagedir);
+						printf(".");
+						fflush(stdout);
 						id=id+1;
 	
 						int pos = 0;
@@ -128,7 +130,8 @@ int main(int argc,char *argv[]){
 						}
 					}
 				}
-			}	
+			}
+			printf("\n");
 			qclose(webq);
 			happly(urlH,webpage_delete);
 			hclose(urlH);

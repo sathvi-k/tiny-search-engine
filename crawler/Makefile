@@ -18,5 +18,14 @@ crawler5:
 crawlerf:
 				gcc $(CFLAGS) crawlerf.c $(LIBS) -o $@
 
+
+run2:
+				rm -f ../pages/*
+				./crawlerf https://thayer.github.io/engs50/ pages 2
+
+grind2:
+				rm -f ../pages/*
+				valgrind --leak-check=full ./crawlerf https://thayer.github.io/engs50/ pages 2 
+
 clean:
 				rm -f crawler crawler3 crawler4 crawler5 crawlerf

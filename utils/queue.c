@@ -119,7 +119,7 @@ void qapply(queue_t *qp, void (*fn)(void* elementp)){
 		}
 	}
 	else{
-		printf("The list is empty, can't apply the function\n");
+		//printf("The list is empty, can't apply the function\n");
 	}
 }
 
