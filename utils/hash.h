@@ -41,3 +41,7 @@ void *hremove(hashtable_t *htp,
 	      const char *key, 
 	      int32_t keylen);
 
+/*hqget--looks for a specific queue in the hashtable using a key. If the key does not exist returns NULL                                
+*/ 
+void *hqget(hashtable_t *htp,const char *key, int32_t keylen);
+
