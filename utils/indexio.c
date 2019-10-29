@@ -16,28 +16,45 @@
 #include <webpage.h>
 #include <pageio.h>
 #include <indexio.h>
-
-
+#include <queue.h>
+#include <hash.h>
+#include <ctype.h>
+#include <stdbool.h>
 FILE *my_file = NULL;
-/*                                                                             
- * indexsave -- save the index to a file named indexnm                         
- * returns: 0 for success; nonzero otherwise                 
- */
+int isID=0;
+bool reset=true;
+
+typedef struct word{                                                                                                             
+  char word[100];                                                                                                                
+  queue_t *queue;                                                                                                                
+}word_t;                                                                                                                         
+                                                                                                                                 
+typedef struct counter{                                                                                                          
+  int id;                                                                                                                        
+  int count;                                                                                                                     
+}counter_t;
+
+typedef struct index{                                                                                  
+  hashtable_t *hashtable;                                                                                
+}index_t;   
 
 
 void printqueue(void *elementp){                                                
   counter_t *doc=(counter_t*)elementp;                                          
   fprintf(my_file,"%d %d ",doc->id,doc->count);                                
 }                                                                               
-                                                                                
+
+                      
 void save_index(void *elementp){                                               
   word_t *wordt=(word_t*)elementp;
 	if (my_file!=NULL) {
-		fprintf(my_file, "\n%s ",wordt->word);                                              
+		fprintf(my_file, "%s ",wordt->word);                                              
 		queue_t *qp=wordt->queue;                                                     
 		qapply(qp,printqueue);
+		fprintf(my_file,"\n");
 	}
 }
+
 
 int32_t indexsave(index_t *indexp, char *indexnm){
 
@@ -54,62 +71,83 @@ int32_t indexsave(index_t *indexp, char *indexnm){
 	                                                                              
   //close the file                                                              
   fclose(my_file);                                                              
-	hclose(hash);
 	return 0;
-	
 }
-                                                                               
-/*                                                                             
- * indexload -- loads the index in <indexnm> into a new index                  
- * returns: non-NULL for success; NULL otherwise                               
- */                                                                            
+
 index_t *indexload(char *indexnm){
 	char file_path[50];                                                                                                            
   char *path= "../indexer";                                                                                                      
   sprintf(file_path,"%s/%s",path,indexnm);  
 
-	hashtable_t *wordH=hopen(150);    
+	hashtable_t *wordH=hopen(150);
+	queue_t *qp=NULL;
+	counter_t *doc=NULL;
+	word_t *wordt=NULL;
 	
-	char * line = NULL;
-	size_t len = 0;
-	ssize_t read;
-	
-	FILE *indexname = fopen (file_path, "r");
-	
-	while ((read = getline(&line, &len, indexname)) != -1) {
+	FILE *indexname=fopen(file_path,"r");
 
-		char allinfo[500];
-		sprintf(allinfo,"%s",line);
+	int letter=fgetc(indexname);
+
+	char prevc;
+	char cp[200];
+	
+	while (letter!=EOF) {
 		
-		char *token = strtok(allinfo, " ");
-		strcpy(word,token);
-		word_t *wordt=(word_t*)malloc(sizeof(word_t));
-		strcpy(wordt->word,word);   
-
-		queue_t *qp=qopen();                                                                       
-		wordt->queue=qp;
-
-		int i=0;
-
-		counter_t *doc;
+		char c= (char) letter;
 		
-		while (token != NULL) {
-				
-				token = strtok(NULL, " ");
-				if (i==0) {
-					doc=(counter_t*)malloc(sizeof(counter_t));
-					doc->id=token;
-					i=1;
-				}
-				else if (i==1) {
-					doc->count=token;
-					i=0;
-					qput(qp,doc);
-				}
+		if(reset){
+			sprintf(cp,"");
 		}
-		hput(wordH,(void*)wordt,word,strlen(word));   
+		
+		if(isalpha(c)!=0){
+			sprintf(cp,"%s%c",cp,c);
+		}
+		
+		else if((isdigit(c)!=0) && isID==0){
+			sprintf(cp,"%s%c",cp,c);
+		}	
+			
+		else if((isdigit(c)!=0) && isID==1){
+			sprintf(cp,"%s%c",cp,c);
+		}	
+		
+		else if(c==' '){
+			
+			if(isalpha(prevc)!=0){
+				wordt=(word_t*)malloc(sizeof(word_t));
+				strcpy(wordt->word,cp);
+				qp=qopen();
+				wordt->queue=qp;
+				reset=true;
+			}
+
+			else if((isdigit(prevc)!=0) && isID==0){
+				doc=(counter_t*)malloc(sizeof(counter_t));
+				int id=atoi(cp);
+				doc->id=id;
+				isID=1;
+				reset=true;
+			}
+			
+			else if((isdigit(prevc)!=0) && isID==1){
+				int count=atoi(cp);
+				doc->count=count;
+				qput(qp,doc);
+				isID=0;
+				reset=true;
+			}
+		}
+		
+		else if(c=='\n'){
+			hput(wordH,(void*)wordt,wordt->word,strlen(wordt->word));
+		}
+		prevc=c;
+		letter=fgetc(indexname);
 	}
+	
 	//WE SHOULD CONVERT wordH TO INDEX DATA STRUCTURE
-	return wordH;	
+	index_t *loaded_index=(index_t*)malloc(sizeof(index_t));
+	loaded_index->hashtable=wordH;
+	return loaded_index;	
 }
 
