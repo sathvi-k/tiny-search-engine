@@ -39,17 +39,17 @@ typedef struct index{
 }index_t;   
 
 
-void printqueue(void *elementp){                                                
-  counter_t *doc=(counter_t*)elementp;                                          
+void printqueue(void *elementp){        
+  counter_t *doc=(counter_t*)elementp;  
   fprintf(my_file,"%d %d ",doc->id,doc->count);                                
-}                                                                               
+}       
 
                       
 void save_index(void *elementp){                                               
   word_t *wordt=(word_t*)elementp;
 	if (my_file!=NULL) {
-		fprintf(my_file, "%s ",wordt->word);                                              
-		queue_t *qp=wordt->queue;                                                     
+		fprintf(my_file, "%s ",wordt->word); 
+		queue_t *qp=wordt->queue;  
 		qapply(qp,printqueue);
 		fprintf(my_file,"\n");
 	}
@@ -60,43 +60,47 @@ int32_t indexsave(index_t *indexp, char *indexnm){
 
 	hashtable_t *hash=indexp->hashtable;
 	
-  //open the file                                                               
+  //open the file             
   char file_path[50];
 	char *path= "../indexer";
-  sprintf(file_path,"%s/%s",path,indexnm);                                       
+  sprintf(file_path,"%s/%s",path,indexnm); 
 
 	my_file = fopen(file_path, "w");                                        
 
-	happly(hash,save_index);
-	                                                                              
-  //close the file                                                              
-  fclose(my_file);                                                              
+	happly(hash,save_index);                                     
+  //close the file
+  fclose(my_file);
 	return 0;
 }
 
 index_t *indexload(char *indexnm){
-	char file_path[50];                                                                                                            
-  char *path= "../indexer";                                                                                                      
-  sprintf(file_path,"%s/%s",path,indexnm);  
+	char file_path[50];                                
+  char *path= "../indexer";
+	sprintf(file_path,"%s/%s",path,indexnm);  
 
-	hashtable_t *wordH=hopen(150);
+	hashtable_t *wordH=hopen(1000);
 	queue_t *qp=NULL;
 	counter_t *doc=NULL;
 	word_t *wordt=NULL;
 	
 	FILE *indexname=fopen(file_path,"r");
 
-	int letter=fgetc(indexname);
+	
 
+
+
+	
+	/*
+	int letter=fgetc(indexname);
 	char prevc;
 	char cp[200];
 	
-	while (letter!=EOF) {
-		
+	while (letter != EOF) {
 		char c= (char) letter;
 		
 		if(reset){
 			sprintf(cp,"");
+			reset=false;
 		}
 		
 		if(isalpha(c)!=0){
@@ -144,10 +148,9 @@ index_t *indexload(char *indexnm){
 		prevc=c;
 		letter=fgetc(indexname);
 	}
-	
+	*/
 	//WE SHOULD CONVERT wordH TO INDEX DATA STRUCTURE
 	index_t *loaded_index=(index_t*)malloc(sizeof(index_t));
 	loaded_index->hashtable=wordH;
 	return loaded_index;	
 }
-

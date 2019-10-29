@@ -18,8 +18,8 @@
 #include <pageio.h>
 
 /*create a page index_t struct to hold the hashtable of words*/
-//typedef struct index index_t;
-typedef void index_t;
+typedef struct index index_t;
+//typedef void index_t;
 
 /* indexsave -- save the index to a file named indexnm                         
  * returns: 0 for success; nonzero otherwise                 

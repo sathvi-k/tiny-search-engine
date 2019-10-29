@@ -173,11 +173,19 @@ int main(int argc,char *argv[]){
 	
 	index_t *loadedindex=indexload("indexsave");
 	indexsave(loadedindex,"indexsave1");
+
+	index_t *loadedindex1=indexload("indexsave1");
+	indexsave(loadedindex1,"indexsave2");
 	
 	hashtable_t *loadedhash=loadedindex->hashtable;
 	happly(loadedhash,word_delete);
 	hclose(loadedhash);
 	free(loadedindex);
+
+	hashtable_t *loadedhash1=loadedindex1->hashtable;
+	happly(loadedhash1,word_delete);
+	hclose(loadedhash1);
+	free(loadedindex1);
                                                                                                            
   exit(EXIT_SUCCESS);                                                           
 }                                                                               
