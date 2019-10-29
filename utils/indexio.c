@@ -24,18 +24,18 @@ FILE *my_file = NULL;
 int isID=0;
 bool reset=true;
 
-typedef struct word{                                                                                                             
-  char word[100];                                                                                                                
-  queue_t *queue;                                                                                                                
-}word_t;                                                                                                                         
-                                                                                                                                 
-typedef struct counter{                                                                                                          
-  int id;                                                                                                                        
-  int count;                                                                                                                     
+typedef struct word{                                                  
+  char word[100];                              
+  queue_t *queue;                                 
+}word_t;
+
+typedef struct counter{                                                  
+  int id;                           
+  int count;                                         
 }counter_t;
 
-typedef struct index{                                                                                  
-  hashtable_t *hashtable;                                                                                
+typedef struct index{            
+  hashtable_t *hashtable;     
 }index_t;   
 
 
