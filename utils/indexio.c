@@ -91,10 +91,9 @@ index_t *indexload(char *indexnm){
   char countsp[500];                                                         
 
 	
-  while (fscanf(indexname, "%s %s %[^\n]", cp, countsp)!=EOF){
-		printf("%s", countsp);
-	}
-				 /*wordt=(word_t*)malloc(sizeof(word_t));                                 
+  while (fscanf(indexname, "%s %[^\n]", cp, countsp)!=EOF){
+		//printf("%s", countsp);
+			wordt=(word_t*)malloc(sizeof(word_t));                                 
       strcpy(wordt->word,cp);                                                
       qp=qopen();                                                            
       wordt->queue=qp;                                                       
@@ -120,7 +119,7 @@ index_t *indexload(char *indexnm){
         token = strtok(NULL, " ");                                           
       }                                                                      
       hput(wordH,(void*)wordt,wordt->word,strlen(wordt->word));                                                    
-			}*/
+	}
 	index_t *loaded_index=(index_t*)malloc(sizeof(index_t));                                                                          
   loaded_index->hashtable=wordH;
 	fclose(indexname);
