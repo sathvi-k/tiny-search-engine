@@ -8,11 +8,11 @@
  * Description: 
  * 
  */
-#include <stdio.h>                                                             
-#include <stdlib.h>                                                            
-#include <string.h>                                                            
-#include <inttypes.h>                                                          
-#include <unistd.h>                                                            
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include <unistd.h>
 #include <webpage.h>
 #include <pageio.h>
 #include <indexio.h>
@@ -26,7 +26,7 @@ int isID=0;
 bool reset=true;
 
 typedef struct word{                                                  
-  char word[100];                              
+  char word[50];                              
   queue_t *queue;                                 
 }word_t;
 
@@ -97,7 +97,7 @@ index_t *indexload(char *indexnm){
 		char c=(char)letter;
 		//printf(c);
 		if(reset){
-			memset(cp,0,strlen(cp));
+			memset(cp,0,sizeof(cp));
 			//sprintf(cp,"");
 			reset=false;
 		}
