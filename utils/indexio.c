@@ -8,11 +8,11 @@
  * Description: 
  * 
  */
-#include <stdio.h>                                                             
-#include <stdlib.h>                                                            
-#include <string.h>                                                            
-#include <inttypes.h>                                                          
-#include <unistd.h>                                                            
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include <unistd.h>
 #include <webpage.h>
 #include <pageio.h>
 #include <indexio.h>
@@ -42,11 +42,11 @@ typedef struct index{
 
 void printqueue(void *elementp){        
   counter_t *doc=(counter_t*)elementp;  
-  fprintf(my_file,"%d %d ",doc->id,doc->count);                                
+  fprintf(my_file,"%d %d ",doc->id,doc->count);
 }       
 
                       
-void save_index(void *elementp){                                               
+void save_index(void *elementp){
   word_t *wordt=(word_t*)elementp;
 	if (my_file!=NULL) {
 		fprintf(my_file, "%s ",wordt->word); 
@@ -74,6 +74,63 @@ int32_t indexsave(index_t *indexp, char *indexnm){
 	return 0;
 }
 
+
+index_t *indexload(char *indexnm){                                           
+  char file_path[50];                                                        
+  char *path= "../indexer";                                                  
+  sprintf(file_path,"%s/%s",path,indexnm);                                   
+                                                                             
+  hashtable_t *wordH=hopen(1000);                                            
+  queue_t *qp=NULL;                                                          
+  counter_t *doc=NULL;                                                       
+  word_t *wordt=NULL;                                                        
+                                                                             
+  FILE *indexname=fopen(file_path,"r");                                      
+                                                                             
+  char cp[50];                                                               
+  char countsp[500];                                                         
+
+	
+  while (fscanf(indexname, "%s %s %[^\n]", cp, countsp)!=EOF){
+		printf("%s", countsp);
+	}
+				 /*wordt=(word_t*)malloc(sizeof(word_t));                                 
+      strcpy(wordt->word,cp);                                                
+      qp=qopen();                                                            
+      wordt->queue=qp;                                                       
+                                                                             
+      char idncount[50];                                                     
+      strcpy(idncount, countsp);                                             
+      //printf("%s\n",idncount);                                                                       
+      char *token = strtok(idncount, " ");                                   
+			// printf("%s\n",token);                                                               
+      int i = 0;                                                             
+                                                                            
+      while (token != NULL) {                                                
+        if (i==0) {                                                          
+          doc=(counter_t*)malloc(sizeof(counter_t));                         
+          doc->id=atoi(token);                                                     
+          i=1;                                                               
+        }
+				else if (i==1) {                                                     
+          doc->count=atoi(token);                                                  
+          i=0;                                                               
+          qput(qp,doc);                                                      
+        }                                                                    
+        token = strtok(NULL, " ");                                           
+      }                                                                      
+      hput(wordH,(void*)wordt,wordt->word,strlen(wordt->word));                                                    
+			}*/
+	index_t *loaded_index=(index_t*)malloc(sizeof(index_t));                                                                          
+  loaded_index->hashtable=wordH;
+	fclose(indexname);
+  return loaded_index;
+ 
+}          
+
+
+
+/*
 index_t *indexload(char *indexnm){
 	char file_path[50];                                
   char *path= "../indexer";
@@ -86,21 +143,21 @@ index_t *indexload(char *indexnm){
 	
 	FILE *indexname=fopen(file_path,"r");
 
-	//	int word=fscanf(indexname, %s ); 
- 
-	int letter=fgetc(indexname);
+	
 	char prevc;
 	char cp[50];
-	
+	//char countsp[500];
+
+	int letter=fgetc(indexname);
 	while (letter != EOF) {
-		//printf(letter);
+		//	fscanf(indexname, "%s %s", cp, countsp);
+		// printf("%s %s", cp, countsp);
 		char c=(char)letter;
-		//printf(c);
 		if(reset){
 			memset(cp,0,strlen(cp));
 			//sprintf(cp,"");
 			reset=false;
-		}
+		 }
 		
 		if(isalpha(c)!=0){
 			sprintf(cp,"%s%c",cp,c);
@@ -146,7 +203,8 @@ index_t *indexload(char *indexnm){
 		}
 		prevc=c;
 		letter=fgetc(indexname);
-		}
+		if
+	}
 	
 	//convert wordH to index_t structure
 	index_t *loaded_index=(index_t*)malloc(sizeof(index_t));
@@ -154,3 +212,4 @@ index_t *indexload(char *indexnm){
 	return loaded_index;
 	fclose(indexname);
 }
+*/
