@@ -102,10 +102,10 @@ char* NormalizeWord(char *word){
 
 int main(int argc,char *argv[]){
   
-  int idmax=atoi(argv[1]);                                                      
-  int idcount=1;                                                                
-  hashtable_t *wordH=hopen(150);                                                
-                                                                                
+  int idmax=atoi(argv[1]);                                                     
+  int idcount=1;                                                               
+  hashtable_t *wordH=hopen(150);                                               
+                                                                               
   while(idcount<=idmax){                                                       
                                                                                
     webpage_t *loaded;                                                         

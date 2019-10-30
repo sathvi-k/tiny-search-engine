@@ -151,6 +151,6 @@ index_t *indexload(char *indexnm){
 	//convert wordH to index_t structure
 	index_t *loaded_index=(index_t*)malloc(sizeof(index_t));
 	loaded_index->hashtable=wordH;
-	return loaded_index;
 	fclose(indexname);
+	return loaded_index;
 }
