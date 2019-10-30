@@ -20,6 +20,7 @@
 #include <hash.h>
 #include <ctype.h>
 #include <stdbool.h>
+
 FILE *my_file = NULL;
 int isID=0;
 bool reset=true;
@@ -57,7 +58,6 @@ void save_index(void *elementp){
 
 
 int32_t indexsave(index_t *indexp, char *indexnm){
-
 	hashtable_t *hash=indexp->hashtable;
 	
   //open the file             
@@ -68,7 +68,8 @@ int32_t indexsave(index_t *indexp, char *indexnm){
 	my_file = fopen(file_path, "w");                                        
 
 	happly(hash,save_index);                                     
-  //close the file
+
+	//close the file
   fclose(my_file);
 	return 0;
 }
@@ -85,21 +86,19 @@ index_t *indexload(char *indexnm){
 	
 	FILE *indexname=fopen(file_path,"r");
 
-	
-
-
-
-	
-	/*
+	//	int word=fscanf(indexname, %s ); 
+ 
 	int letter=fgetc(indexname);
 	char prevc;
-	char cp[200];
+	char cp[50];
 	
 	while (letter != EOF) {
-		char c= (char) letter;
-		
+		//printf(letter);
+		char c=(char)letter;
+		//printf(c);
 		if(reset){
-			sprintf(cp,"");
+			memset(cp,0,strlen(cp));
+			//sprintf(cp,"");
 			reset=false;
 		}
 		
@@ -113,8 +112,8 @@ index_t *indexload(char *indexnm){
 			
 		else if((isdigit(c)!=0) && isID==1){
 			sprintf(cp,"%s%c",cp,c);
-		}	
-		
+		}
+
 		else if(c==' '){
 			
 			if(isalpha(prevc)!=0){
@@ -147,10 +146,11 @@ index_t *indexload(char *indexnm){
 		}
 		prevc=c;
 		letter=fgetc(indexname);
-	}
-	*/
-	//WE SHOULD CONVERT wordH TO INDEX DATA STRUCTURE
+		}
+	
+	//convert wordH to index_t structure
 	index_t *loaded_index=(index_t*)malloc(sizeof(index_t));
 	loaded_index->hashtable=wordH;
-	return loaded_index;	
+	return loaded_index;
+	fclose(indexname);
 }

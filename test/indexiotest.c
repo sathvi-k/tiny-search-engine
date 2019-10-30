@@ -106,63 +106,61 @@ int main(int argc,char *argv[]){
   int idcount=1;                                                                
   hashtable_t *wordH=hopen(150);                                                
                                                                                 
-  while(idcount<=idmax){                                                        
-                                                                                
-    webpage_t *loaded;                                                          
-    loaded=pageload(idcount,"pages");                                           
-                                                                                
-    int pos=0;                                                                  
-    char *wordp;                                                                
-                                                                                
-    while((pos=webpage_getNextWord(loaded,pos,&wordp))>0){                      
-			
-      if (NormalizeWord(wordp)!=NULL){                                          
-				
-        //if there's NO word object in the hashtable with the norm_word=word, put this object into                                                             
-        //the hashtable                                                         
-        if (hsearch(wordH,hsearchfn,wordp,strlen(wordp))==NULL){                
-          word_t *wordt=(word_t*)malloc(sizeof(word_t));                        
-          strcpy(wordt->word,wordp);                                            
-          queue_t *qp=qopen();                                                  
-          wordt->queue=qp;                                                      
-                                                                                
-          counter_t *doc=(counter_t*)malloc(sizeof(counter_t));                 
-          doc->id=idcount;                                                      
-          doc->count=1;                                                         
-                                                                                
-          qput(qp,doc);                                                         
-          hput(wordH,(void*)wordt,wordp,strlen(wordp));                         
-        }                                                                       
-                                                                                
-        //if there IS word object in the hashtable with                         
+  while(idcount<=idmax){                                                       
+                                                                               
+    webpage_t *loaded;                                                         
+    loaded=pageload(idcount,"pages");                                          
+                                                                               
+    int pos=0;                                                                 
+    char *wordp;                                                               
+                                                                               
+    while((pos=webpage_getNextWord(loaded,pos,&wordp))>0){			
+      if (NormalizeWord(wordp)!=NULL){                                         
+        //if there's NO word object in the hashtable with the norm_word=word, put this object into                                                            
+        //the hashtable                  
+        if (hsearch(wordH,hsearchfn,wordp,strlen(wordp))==NULL){               
+          word_t *wordt=(word_t*)malloc(sizeof(word_t));                      
+          strcpy(wordt->word,wordp);                                           
+          queue_t *qp=qopen();                                                 
+          wordt->queue=qp;                                                     
+                                                                               
+          counter_t *doc=(counter_t*)malloc(sizeof(counter_t));                
+          doc->id=idcount;                                                     
+          doc->count=1;                                                        
+                                                                               
+          qput(qp,doc);                                                        
+          hput(wordH,(void*)wordt,wordp,strlen(wordp));                        
+        }                                                                      
+                                                                               
+        //if there IS word object in the hashtable with                        
         //its norm_word attribute equal to the value of "word" variable
-				else{                                                                   
-          word_t *wtp=(word_t*)hsearch(wordH,hsearchfn,wordp,strlen(wordp));    
-          queue_t *qp=wtp->queue;                                               
-                                                                                
-          if(qsearch(qp,qsearchfn,(const void*)&idcount)==NULL){                
-            counter_t *doc1=(counter_t*)malloc(sizeof(counter_t));              
-            doc1->id=idcount;                                                   
-            doc1->count=1;                                                      
-                                                                                
-            qput(qp,doc1);                                                      
-          }                                                                     
-                                                                                
-          else{                                                                 
-            counter_t *ctp=(counter_t*)qsearch(qp,qsearchfn,(const void*)&idcount);                                                                            
-            ctp->count+=1;                                                      
-          }                                                                     
-                                                                                
-        }                                                                       
-                                                                                
-      }                                                                         
-      free(wordp);                                                              
-      wordp=NULL;                                                               
-    }                                                                           
-    idcount+=1;                                                                 
-    webpage_delete(loaded);                                                     
-    loaded=NULL;                                                                
-  }                                                                             
+				else{                                                                  
+          word_t *wtp=(word_t*)hsearch(wordH,hsearchfn,wordp,strlen(wordp));   
+          queue_t *qp=wtp->queue;                                              
+                                                                               
+          if(qsearch(qp,qsearchfn,(const void*)&idcount)==NULL){               
+            counter_t *doc1=(counter_t*)malloc(sizeof(counter_t));             
+            doc1->id=idcount;                                                  
+            doc1->count=1; 
+            qput(qp,doc1);                                                     
+          }                                                                    
+                                                                               
+          else{                                                                
+            counter_t *ctp=(counter_t*)qsearch(qp,qsearchfn,(const void*)&idcount);                                                                           
+            ctp->count+=1;                                                     
+          }                                                                    
+                                                                               
+        }                                                                      
+                                                                               
+      }                                                                        
+      free(wordp);                                                             
+      wordp=NULL;                                                              
+    }                                                                          
+    idcount+=1;                                                                
+    webpage_delete(loaded);                                                    
+    loaded=NULL;                                                               
+  }
+	
 	index_t *indext=(index_t*)malloc(sizeof(index_t));
 	indext->hashtable=wordH;
 
@@ -174,19 +172,18 @@ int main(int argc,char *argv[]){
 	index_t *loadedindex=indexload("indexsave");
 	indexsave(loadedindex,"indexsave1");
 
+	hashtable_t *loadedhash=loadedindex->hashtable;                              
+  happly(loadedhash,word_delete);                                              
+  hclose(loadedhash);                                                          
+  free(loadedindex); 
+	
 	index_t *loadedindex1=indexload("indexsave1");
 	indexsave(loadedindex1,"indexsave2");
-	
-	hashtable_t *loadedhash=loadedindex->hashtable;
-	happly(loadedhash,word_delete);
-	hclose(loadedhash);
-	free(loadedindex);
 
 	hashtable_t *loadedhash1=loadedindex1->hashtable;
 	happly(loadedhash1,word_delete);
 	hclose(loadedhash1);
 	free(loadedindex1);
-                                                                                                           
-  exit(EXIT_SUCCESS);                                                           
-}                                                                               
-    
+	
+  exit(EXIT_SUCCESS);
+}
