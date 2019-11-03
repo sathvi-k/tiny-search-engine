@@ -145,9 +145,17 @@ int main(int argc,char *argv[]){
 		dir=opendir(dir_path);
 		
 		while((entry=readdir(dir)) != NULL){
-			idmax+=1;
+			
+			if((strcmp(entry->d_name,".")==0) || (strcmp(entry->d_name,"..")==0)){
+				;
+			}
+			else{
+				idmax=idmax+1;
+			}
 		}
+	
 		closedir(dir);
+		printf("filecount:%d",idmax);
 		
 		hashtable_t *wordH=hopen(150);
 		while(idcount<=idmax){

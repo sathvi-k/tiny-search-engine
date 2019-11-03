@@ -19,7 +19,7 @@ int main(void){
   printf("> ");
   int returned;
 	FILE *index = fopen("../indexer/index1", "r");
-	int id = 1;
+	//int id = 1;
 	char word[20];
 	char countersp[100];
 	
