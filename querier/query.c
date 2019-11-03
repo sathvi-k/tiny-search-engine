@@ -26,34 +26,32 @@ int main(void){
       char output[50]="";
                 
       while (token != NULL){
-	// take word from string user enters and check that it only
-	// has alphabetical characters, and convert to lowercase letters
-	for (int i=0;i<strlen(token);i++){
-	  if (isalpha(token[i])!=0){
-	    token[i]=tolower(token[i]);
-	    j=0;
-	  }
-	  //otherwise, there's numbers and punctuations, so it's invalid
-	  else if (isalpha(token[i])==0){
-	    j=1;
-	  }
-	  
-	  printf("%d", j);
-	}
-	
-	if (j==0){
-	  sprintf(output,"%s%s ",output, token);
-	}
-	// after converting to lowercase, print word, then move pointer
-	// to next word
-	token = strtok(NULL, " \t");
+				// take word from string user enters and check that it only
+				// has alphabetical characters, and convert to lowercase letters
+				for (int i=0;i<strlen(token);i++){
+					if (isalpha(token[i])!=0){
+						token[i]=tolower(token[i]);
+						j=0;
+					}
+					//otherwise, there's numbers and punctuations, so it's invalid
+					else if (isalpha(token[i])==0){
+						j=1;
+					}					
+ 				}
+				
+				if (j==0){
+					sprintf(output,"%s%s ",output, token);
+				}
+				// after converting to lowercase, print word, then move pointer
+				// to next word
+				token = strtok(NULL, " \t");
       }
       // print newline and > to prompt user for input
       if (j==0){	
-	printf("%s",output);
+				printf("%s",output);
       }
       else if (j==1){
-	printf("[invalid query]");
+				printf("[invalid query]");
       }
     }
     if (sscanf(input, "%d", &data) != 1){
