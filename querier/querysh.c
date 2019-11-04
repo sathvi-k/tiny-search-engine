@@ -29,7 +29,7 @@ int main(void){
   while((returned=scanf(" %[^\n]",input))==1){
 		// split user's input by spaces and tabs
 		
-		char *token = strtok(input,"  \t");
+		char *token = strtok(input," ");
 	 
 		while (token != NULL){
 			
@@ -78,7 +78,7 @@ int main(void){
 			}
 			// after converting to lowercase, print word, then move pointer
 			// to next word
-			token = strtok(NULL,"  \t");
+			token = strtok(NULL," ");
 		}
 		
 		sprintf(printed, "%s -- %d", printed, min);
