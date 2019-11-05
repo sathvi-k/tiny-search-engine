@@ -107,6 +107,80 @@ void print_rank_queue(void *data){
 }
 
 
+queue_t *splitted_by_or(char* input){
+	// split user's input by spaces and tabs
+	char *token = strtok(input," \t");
+	char output[1000]="";
+	queue_t *docqueue=qopen();
+	
+	while (token != NULL){
+
+		int id=1;
+		
+		// take word from string user enters and check that it only
+			// has alphabetical characters, and convert to lowercase letters
+		for (int i=0;i<strlen(token);i++){
+			if (isalpha(token[i])!=0){
+				token[i]=tolower(token[i]);
+			}
+			
+			//otherwise, there's numbers and punctuations, so it's invalid
+			else if (isalpha(token[i])==0){
+				printit=false;
+			}					
+		}
+		
+		sprintf(output,"%s%s ",output,token);
+		
+		if(strcmp(token,"and")==0 || strlen(token)<3){
+			;
+		}
+		
+		else{   
+			word_t *foundword;
+			//search for token in hashtable using hsearch
+			foundword=hsearch(hashtable,hsearchfn,token,strlen(token));
+			
+			if(foundword!=NULL){ // token is in index
+				while(id<=idmax){
+					queue_t *queue=foundword->queue;
+					counter_t *doc=qsearch(queue,qsearchfn,(const void*)&id);
+					
+					if(doc!=NULL){ // token is in document
+						int count=doc->count;
+						docrank_t *sdoc=qsearch(docqueue,docqsearchfn,(const void*)&id);
+						
+						if(sdoc!=NULL){ // document is in queue of docs containing token
+							if(count<(sdoc->rank)){ // replace with lower rank
+								sdoc->rank=count;
+							}
+						}				
+					}
+					
+					else{ // doc is NULL
+						docrank_t *rdoc=qremove(docqueue,docqsearchfn,(const void*)&id);
+						
+						if(rdoc!=NULL){
+							free(rdoc);
+						}
+					}
+					id++;	
+				}
+			}
+			else{ // foundword is NULL, therefore not in the index
+				printit=false;
+			}
+		}
+		
+		// after converting to lowercase, print word, then move pointer
+		// to next word
+		token = strtok(NULL," \t");
+		qclose(docqueue);
+		return docqueue;
+	}
+}
+
+
 int main(void){	
   char dir_path[50];
 	char *path= "../";
@@ -130,10 +204,12 @@ int main(void){
 		}
 	}          
 	closedir(dir);
+
+	
 	
 	index_t *index = indexload("index2");
 	hashtable_t *hashtable = index->hashtable;
-	queue_t *docqueue=qopen();
+	
 
 	int idcount=1;
 	
@@ -158,6 +234,8 @@ int main(void){
 	bool printit=true;
   char input[1000];
 	
+
+	
   printf("> ");
   
   while(fgets(input,1000,stdin)!=NULL){
@@ -167,80 +245,21 @@ int main(void){
 		}
 		
 		input[strlen(input)-1]='\0';
-		
-    // split user's input by spaces and tabs
-		char *token = strtok(input," \t");
-		char output[1000]="";
-		
-		while (token != NULL){
 
-			int id=1;
-			
-			// take word from string user enters and check that it only
-			// has alphabetical characters, and convert to lowercase letters
-			for (int i=0;i<strlen(token);i++){
-				if (isalpha(token[i])!=0){
-					token[i]=tolower(token[i]);
-				}
-				
-				//otherwise, there's numbers and punctuations, so it's invalid
-				else if (isalpha(token[i])==0){
-					printit=false;
-				}					
+		queue_t word_queues[20];
+    char* token = strtok(input, " /t");
+		int wq_i=0;
+		char string[10];
+		while (token!=NULL){
+			if (strcmp(token,"or")==0){
+				queue_t *q=splitted_by_or(string);
+				word_queues[wq_i]=q;
+				wq_i++;
+				memset(string, 0, sizeof(string));
 			}
-
-			sprintf(output,"%s%s ",output,token);
-
-			
-			if(strcmp(token,"and")==0 || strlen(token)<3){
-        ;
-      }
-			
-      else{   
-				word_t *foundword;
-				//search for token in hashtable using hsearch
-				
-				
-				foundword=hsearch(hashtable,hsearchfn,token,strlen(token));
-				
-				if(foundword!=NULL){
-					
-					while(id<=idmax){
-						
-						queue_t *queue=foundword->queue;
-						counter_t *doc=qsearch(queue,qsearchfn,(const void*)&id);
-						
-						if(doc!=NULL){
-							int count=doc->count;
-							docrank_t *sdoc=qsearch(docqueue,docqsearchfn,(const void*)&id);
-							
-							if(sdoc!=NULL){
-								if(count<(sdoc->rank)){
-									sdoc->rank=count;
-								}
-							}
-							
-						}
-						
-						else{
-							docrank_t *rdoc=qremove(docqueue,docqsearchfn,(const void*)&id);
-							
-							if(rdoc!=NULL){
-								free(rdoc);
-							}
-							
-						}
-						id++;	
-					}
-				}
-				else{
-					printit=false;
-				}
+			else{
+				sprintf(string, "%s %s", string, token);
 			}
-			
-			// after converting to lowercase, print word, then move pointer
-			// to next word
-			token = strtok(NULL," \t");	
 		}
 		
 		// print newline and > to prompt user for input
@@ -255,6 +274,13 @@ int main(void){
 			printf("> ");
 			printit=true;
 		}		
+	}
+
+	for (int i=0; i<sizeof(word_queues); i++){
+		if (word_queues[i]!=NULL|| word_queues[i]!=0){
+			
+		}
+		
 	}
 	
 	qapply(docqueue,docrankclose);
