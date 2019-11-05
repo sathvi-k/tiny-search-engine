@@ -17,6 +17,7 @@
 #include <queue.h>
 #include <hash.h>
 #include <pageio.h>
+#include <dirent.h>
 
 typedef struct index{                                                                                                                                                                                                                                                             
   hashtable_t *hashtable;                                                                                                                                                                                                                                                         
@@ -30,13 +31,24 @@ typedef struct word{
 typedef struct counter{                                                                                                                                                                                                                                                           
   int id;                                                                                                                                                                                                                                                                         
   int count;                                                                                                                                                                                                                                                                      
-}counter_t;     
+}counter_t;
 
+typedef struct docrank{
+	int id;
+	int rank;
+	char url[500];
+}docrank_t;
+
+
+void docrankclose(void *data){
+	docrank_t *doc=(docrank_t*)data;
+	free(doc);
+}
 
 void qdataclose(void *data){                                                                                                                                                                                                                                                      
   counter_t *doc=(counter_t*)data;                                                                                                                                                                                                                                                
   free(doc);                                                                                                                                                                                                                                                                      
-}                                                                                                                                                                                                                                                                                  
+} 
                                                                                                                                                                                                                                                                                   
 void word_delete(void *data){                                                                                                                                                                                                                                                     
   word_t *wtp=(word_t*)data;                                                                                                                                                                                                                                                      
@@ -70,15 +82,76 @@ bool qsearchfn(void* elementp,const void* searchkeyp){
   else{                                                                                                                                                                                                                                                                           
     return false;                                                                                                                                                                                                                                                                 
   }                                                                                                                                                                                                                                                                               
-}            
+}
 
+bool docqsearchfn(void* elementp,const void* searchkeyp){                                                                                                                                                                                                                            
+  docrank_t *docp=(docrank_t*)elementp;                                                                                                                                                                                                                                             
+  int *id=(int*)searchkeyp;                                                                                                                                                                                                                                                       
+  int docid=docp->id;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+  if(docid==*id){                                                                                                                                                                                                                                                                 
+    return true;                                                                                                                                                                                                                                                                  
+  }                                                                                                                                                                                                                                                                               
+  else{                                                                                                                                                                                                                                                                           
+    return false;                                                                                                                                                                                                                                                                 
+  }                                                                                                                                                                                                                                                                               
+}
+
+void print_rank_queue(void *data){
+	docrank_t *doc=(docrank_t*)data;
+	int rank=doc->rank;
+	int id=doc->id;
+	char *url=doc->url;
+	printf("rank:%d : doc:%d : %s\n",rank,id,url);
+}
 
 
 int main(void){
-	index_t *index = indexload("index1");
-	hashtable_t *hashtable = index->hashtable;
-	int id=1;
 	
+  char dir_path[50];                                                                                                                                                                                                                                                            
+	char *path= "../";
+	char *pagedir="pages";
+	sprintf(dir_path,"%s%s",path,pagedir);                                                                                                                                                                                
+	int idmax=0;
+	
+	DIR *dir;                                                                                                                                                                                                                                                                     
+	struct dirent *entry;                                                                                                                                                                                                                                                         
+	dir=opendir(dir_path);  
+	
+	while((entry=readdir(dir)) != NULL){                                                                                                                                                                                                                                          
+		
+		if((strcmp(entry->d_name,".")==0) || (strcmp(entry->d_name,"..")==0)){                                                                                                                                                                                                      
+			;                                                                                                                                                                                                                                                                         
+		}                                                                                                                                                                                                                                                                           
+		else{                                                                                                                                                                                                                                                                       
+			idmax=idmax+1;                                                                                                                                                                                                                                                            
+		}                                                                                                                                                                                                                                                                           
+	}          
+	closedir(dir);
+	
+	index_t *index = indexload("index2");
+	hashtable_t *hashtable = index->hashtable;
+	queue_t *docqueue=qopen();
+
+	int idcount=1;
+	
+	while(idcount<=idmax){
+		docrank_t *docrank = (docrank_t*)malloc(sizeof(docrank_t));
+		docrank->id=idcount;
+		docrank->rank=2147483647;
+
+		char webpage_path[300];
+		sprintf(webpage_path,"%s/%d",dir_path,idcount);
+		
+		FILE *webpage=fopen(webpage_path,"r");
+		char url[500];
+		fscanf(webpage,"%s",url);
+		strcpy(docrank->url,url);
+		fclose(webpage);
+		
+		qput(docqueue,docrank);
+		idcount++;
+	}
+		
 	bool printit=true;
   char input[1000];
 	
@@ -95,11 +168,10 @@ int main(void){
     // split user's input by spaces and tabs
 		char *token = strtok(input," \t");
 		char output[1000]="";
-
-		//largest number in c
-		int min = 2147483647;
 		
 		while (token != NULL){
+
+			int id=1;
 			
 			// take word from string user enters and check that it only
 			// has alphabetical characters, and convert to lowercase letters
@@ -113,27 +185,56 @@ int main(void){
 					printit=false;
 				}					
 			}
-				
-			if(strcmp(token,"and")==0 || strlen(token)<3){
-				;
-			}
+
+			sprintf(output,"%s%s ",output,token);
+
 			
-			else{
+			if(strcmp(token,"and")==0 || strlen(token)<3){
+        ;
+      }
+			
+      else{   
 				word_t *foundword;
 				//search for token in hashtable using hsearch
+				
+				
 				foundword=hsearch(hashtable,hsearchfn,token,strlen(token));
 				
 				if(foundword!=NULL){
-					queue_t *queue=foundword->queue;
-					counter_t *doc=qsearch(queue,qsearchfn,(const void*)&id);
-					int count=doc->count;
-					sprintf(output,"%s%s:%d ",output,token,count);
 					
-					if(count<min){
-						min=count;
+					while(id<=idmax){
+						
+						queue_t *queue=foundword->queue;
+						counter_t *doc=qsearch(queue,qsearchfn,(const void*)&id);
+						
+						if(doc!=NULL){
+							int count=doc->count;
+							docrank_t *sdoc=qsearch(docqueue,docqsearchfn,(const void*)&id);
+							
+							if(sdoc!=NULL){
+								if(count<(sdoc->rank)){
+									sdoc->rank=count;
+								}
+							}
+							
+						}
+						
+						else{
+							docrank_t *rdoc=qremove(docqueue,docqsearchfn,(const void*)&id);
+							
+							if(rdoc!=NULL){
+								free(rdoc);
+							}
+							
+						}
+						id++;	
 					}
 				}
-			}	
+				else{
+					printit=false;
+				}
+			}
+			
 			// after converting to lowercase, print word, then move pointer
 			// to next word
 			token = strtok(NULL," \t");	
@@ -141,16 +242,20 @@ int main(void){
 		
 		// print newline and > to prompt user for input
 		if(printit){
-			printf("%s-- %d\n",output,min);
+			printf("%s\n",output);
+			qapply(docqueue,print_rank_queue);
 			printf("> ");
 		}
+		
 		else{
 			printf("[invalid query]\n");
 			printf("> ");
 			printit=true;
 		}		
 	}
-
+	
+	qapply(docqueue,docrankclose);
+	qclose(docqueue);
 	happly(hashtable,word_delete);
 	hclose(hashtable);
 	free(index);

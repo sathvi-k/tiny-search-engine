@@ -1,7 +1,7 @@
 CFLAGS=-Wall -pedantic -std=c11 -I../utils -L../lib -g
 LIBS=-lutils -lcurl
 
-all: clean query query2 querysh
+all: clean query query2 query3
 
 query:
 				gcc $(CFLAGS) query.c $(LIBS) -o $@
@@ -9,8 +9,8 @@ query:
 query2:
 				gcc $(CFLAGS) query2.c $(LIBS) -o $@
 
-querysh:
-				gcc $(CFLAGS) querysh.c $(LIBS) -o $@
+query3:
+				gcc $(CFLAGS) query3.c $(LIBS) -o $@
 
 clean:
-				rm -f query query2 querysh
+				rm -f query query2 query3
