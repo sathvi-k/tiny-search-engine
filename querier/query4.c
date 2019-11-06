@@ -39,6 +39,10 @@ typedef struct docrank{
 	char url[500];
 }docrank_t;
 
+typedef struct splitword{
+	char ANDword[200];
+}splitword_t;
+
 
 void docrankclose(void *data){
 	docrank_t *doc=(docrank_t*)data;
@@ -106,87 +110,40 @@ void print_rank_queue(void *data){
 	printf("rank:%d : doc:%d : %s\n",rank,id,url);
 }
 
-
-queue_t *splitted_by_or(char* input){
-	// split user's input by spaces and tabs
-	char *token = strtok(input," \t");
-	char output[1000]="";
-	queue_t *docqueue=qopen();
+queue_t* createqueryqueue(char* query){
+	queue_t *queue=qopen();
+	char *token;
+	char ANDstring[1000]="";
 	
-	while (token != NULL){
-
-		int id=1;
-		
-		// take word from string user enters and check that it only
-			// has alphabetical characters, and convert to lowercase letters
-		for (int i=0;i<strlen(token);i++){
-			if (isalpha(token[i])!=0){
-				token[i]=tolower(token[i]);
-			}
-			
-			//otherwise, there's numbers and punctuations, so it's invalid
-			else if (isalpha(token[i])==0){
-				printit=false;
-			}					
+	token=strtok(query," ");
+	
+	while(token!=NULL){
+		if(strcmp(token,"or")==0){
+			splitword_t *string=(splitword_t*)malloc(sizeof(splitword_t));
+			strcpy(string->ANDword,ANDstring);
+			qput(queue,string);
+			sprintf(ANDstring,"%s","");
 		}
-		
-		sprintf(output,"%s%s ",output,token);
-		
-		if(strcmp(token,"and")==0 || strlen(token)<3){
-			;
+		else{
+			sprintf(ANDstring,"%s%s ",ANDstring,token);
 		}
-		
-		else{   
-			word_t *foundword;
-			//search for token in hashtable using hsearch
-			foundword=hsearch(hashtable,hsearchfn,token,strlen(token));
-			
-			if(foundword!=NULL){ // token is in index
-				while(id<=idmax){
-					queue_t *queue=foundword->queue;
-					counter_t *doc=qsearch(queue,qsearchfn,(const void*)&id);
-					
-					if(doc!=NULL){ // token is in document
-						int count=doc->count;
-						docrank_t *sdoc=qsearch(docqueue,docqsearchfn,(const void*)&id);
-						
-						if(sdoc!=NULL){ // document is in queue of docs containing token
-							if(count<(sdoc->rank)){ // replace with lower rank
-								sdoc->rank=count;
-							}
-						}				
-					}
-					
-					else{ // doc is NULL
-						docrank_t *rdoc=qremove(docqueue,docqsearchfn,(const void*)&id);
-						
-						if(rdoc!=NULL){
-							free(rdoc);
-						}
-					}
-					id++;	
-				}
-			}
-			else{ // foundword is NULL, therefore not in the index
-				printit=false;
-			}
-		}
-		
-		// after converting to lowercase, print word, then move pointer
-		// to next word
-		token = strtok(NULL," \t");
-		qclose(docqueue);
-		return docqueue;
+		token=strtok(NULL," ");
 	}
+	splitword_t *string1=(splitword_t*)malloc(sizeof(splitword_t));
+	strcpy(string1->ANDword,ANDstring);
+	qput(queue,string1);
+	return queue;
 }
 
-
-int main(void){	
+int main(void){
+	
+	queue_t *docqueueholder=qopen();
+	int idmax=0;
+	
   char dir_path[50];
 	char *path= "../";
 	char *pagedir="pages";
 	sprintf(dir_path,"%s%s",path,pagedir);
-	int idmax=0;
 	
 	DIR *dir;
 	struct dirent *entry;
@@ -205,39 +162,16 @@ int main(void){
 	}          
 	closedir(dir);
 
-	
-	
+
 	index_t *index = indexload("index2");
 	hashtable_t *hashtable = index->hashtable;
 	
-
-	int idcount=1;
-	
-	while(idcount<=idmax){
-		docrank_t *docrank = (docrank_t*)malloc(sizeof(docrank_t));
-		docrank->id=idcount;
-		docrank->rank=2147483647;
-
-		char webpage_path[300];
-		sprintf(webpage_path,"%s/%d",dir_path,idcount);
-		
-		FILE *webpage=fopen(webpage_path,"r");
-		char url[500];
-		fscanf(webpage,"%s",url);
-		strcpy(docrank->url,url);
-		fclose(webpage);
-		
-		qput(docqueue,docrank);
-		idcount++;
-	}
-		
 	bool printit=true;
   char input[1000];
 	
+  printf("> ");
 
 	
-  printf("> ");
-  
   while(fgets(input,1000,stdin)!=NULL){
 		
 		if(input[0] == '\n'){
@@ -245,27 +179,166 @@ int main(void){
 		}
 		
 		input[strlen(input)-1]='\0';
+		
+    // split user's input by spaces and tabs
+		char *token = strtok(input," \t");
+		char output[1000]="";
 
-		queue_t word_queues[20];
-    char* token = strtok(input, " /t");
-		int wq_i=0;
-		char string[10];
-		while (token!=NULL){
-			if (strcmp(token,"or")==0){
-				queue_t *q=splitted_by_or(string);
-				word_queues[wq_i]=q;
-				wq_i++;
-				memset(string, 0, sizeof(string));
+	
+		while (token != NULL){
+
+			// take word from string user enters and check that it only
+			// has alphabetical characters, and convert to lowercase letters
+			for (int i=0;i<strlen(token);i++){
+				if (isalpha(token[i])!=0){
+					token[i]=tolower(token[i]);
+				}
+				
+				//otherwise, there's numbers and punctuations, so it's invalid
+				else if (isalpha(token[i])==0){
+					printit=false;
+				}					
 			}
-			else{
-				sprintf(string, "%s %s", string, token);
+
+			sprintf(output,"%s%s ",output,token);
+			
+			token = strtok(NULL," \t");	
+		}
+
+	
+		queue_t *queryqueue=createqueryqueue(output);
+		splitword_t *ANDquery;
+		
+		while((ANDquery=(splitword_t*)qget(queryqueue))!=NULL){
+			queue_t *docqueue=qopen();
+			int idcount=1;
+
+			
+			while(idcount<=idmax){
+				docrank_t *docrank = (docrank_t*)malloc(sizeof(docrank_t));
+				docrank->id=idcount;
+				docrank->rank=2147483647;
+				
+				char webpage_path[300];
+				sprintf(webpage_path,"%s/%d",dir_path,idcount);
+				
+				FILE *webpage=fopen(webpage_path,"r");
+				char url[500];
+				fscanf(webpage,"%s",url);
+				strcpy(docrank->url,url);
+				fclose(webpage);
+				
+				qput(docqueue,docrank);
+				idcount++;
 			}
+			
+			
+			char *ANDtoken=strtok(ANDquery->ANDword," ");
+			
+			while(ANDtoken!=NULL){
+				
+				if(strcmp(ANDtoken,"and")==0 || strlen(ANDtoken)<3){
+					;
+				}
+				
+				else{   
+					word_t *foundword;
+					//search for token in hashtable using hsearch
+					foundword=hsearch(hashtable,hsearchfn,ANDtoken,strlen(ANDtoken));
+					
+					if(foundword!=NULL){
+						
+						int id=1;
+						
+						while(id<=idmax){
+							
+							queue_t *queue=foundword->queue;
+							counter_t *doc=qsearch(queue,qsearchfn,(const void*)&id);
+							
+							if(doc!=NULL){
+								int count=doc->count;
+								docrank_t *sdoc=qsearch(docqueue,docqsearchfn,(const void*)&id);
+								
+								if(sdoc!=NULL){
+									if(count<(sdoc->rank)){
+										sdoc->rank=count;
+									}
+								}
+								
+							}
+							
+							else{
+								docrank_t *rdoc=qremove(docqueue,docqsearchfn,(const void*)&id);
+								
+								if(rdoc!=NULL){
+									free(rdoc);
+								}
+								
+							}
+							id++;	
+						}
+					}
+					else{
+						printit=false;
+						printf("word not in index\n");
+					}
+				}
+				ANDtoken=strtok(NULL," ");
+			}
+			qput(docqueueholder,docqueue);
+		}
+		
+		//loop through docqueueholder and get the overall count for each document 
+		queue_t *newqueue=qopen();
+		int count1=1;
+		queue_t *docqueue1;
+		docrank_t *doc1;
+		docrank_t *docnew;
+		
+		while(count1<=idmax){
+			docrank_t *newdoc=(docrank_t*)malloc(sizeof(docrank_t));
+			newdoc->id=count1;
+			newdoc->rank=0;
+			
+			char webpage_path1[300];
+			sprintf(webpage_path1,"%s/%d",dir_path,count1);
+			
+			FILE *webpage1=fopen(webpage_path1,"r");
+			char url1[500];
+			fscanf(webpage1,"%s",url1);
+			strcpy(newdoc->url,url1);
+			fclose(webpage1);
+			
+			qput(newqueue,newdoc);
+			count1++;
+		}
+		
+		count1=1;
+		while((docqueue1=(queue_t*)qget(docqueueholder))!=NULL){
+			
+			while(count1<=idmax){
+				doc1=qsearch(docqueue1,docqsearchfn,(const void*)&count1);
+				docnew=qsearch(newqueue,docqsearchfn,(const void*)&count1);
+				
+				if(doc1==NULL){
+					;
+				}
+				
+				else{
+					int rank=doc1->rank;
+					int newrank=docnew->rank;
+					docnew->rank=newrank+rank;
+				}
+				count1++;
+			}
+			qapply(docqueue1,docrankclose);
+			free(docqueue1);
 		}
 		
 		// print newline and > to prompt user for input
 		if(printit){
 			printf("%s\n",output);
-			qapply(docqueue,print_rank_queue);
+			qapply(newqueue,print_rank_queue);
 			printf("> ");
 		}
 		
@@ -273,21 +346,18 @@ int main(void){
 			printf("[invalid query]\n");
 			printf("> ");
 			printit=true;
-		}		
-	}
-
-	for (int i=0; i<sizeof(word_queues); i++){
-		if (word_queues[i]!=NULL|| word_queues[i]!=0){
-			
 		}
-		
+		qapply(newqueue,docrankclose);
+		qclose(newqueue);
 	}
 	
-	qapply(docqueue,docrankclose);
-	qclose(docqueue);
+	
+	qclose(docqueueholder);
+	
 	happly(hashtable,word_delete);
 	hclose(hashtable);
 	free(index);
+	
 	printf("^D\n");
   return 0;
 }

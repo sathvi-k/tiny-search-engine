@@ -19,8 +19,6 @@
 #include <pageio.h>
 #include <dirent.h>
 
-int idmax=0;
-
 typedef struct index{
 	hashtable_t *hashtable;
 }index_t;
@@ -129,47 +127,15 @@ queue_t* createqueryqueue(char* query){
 }
 
 queue_t* createfinalrankqueue(void* data){
-	queue_t *newqueue=qopen();
-	queue_t *docqueueholder=(queue_t*)data;
-	int count=1;
-	queue_t *docqueue;
-	docrank_t *doc;
 	
-	while(count<=idmax){
-		
-		docrank_t *newdoc=(docrank_t*)malloc(sizeof(docrank_t));
-		newdoc->id=count;
-		newdoc->rank=0;
-		
-		char webpage_path[300];
-		sprintf(webpage_path,"%s/%d",dir_path,count);
-		
-		FILE *webpage=fopen(webpage_path,"r");
-		char url[500];
-		fscanf(webpage,"%s",url);
-		strcpy(newdoc->url,url);
-		fclose(webpage);
- 
-		while((docqueue=(queue_t*)qget(docqueueholder))!=NULL){
-			doc=qsearch(docqueue,docqsearchfn,(const void*)&count);
-			if(doc==NULL){
-				;
-			}
-			else{
-				int rank=doc->rank;
-				int newrank=newdoc->rank;
-				newdoc->rank=newrank+rank;
-			}
-		}
-		qput(newqueue,newdoc);
-		count++;
-	}
+
 }
 
 
 int main(void){
 	
 	queue_t docqueueholder=qopen();
+	int idmax=0;
 	
   char dir_path[50];
 	char *path= "../";
@@ -332,15 +298,55 @@ int main(void){
 			}
 			qput(docqueueholder,docqueue);	
 		}
-		// after converting to lowercase, print word, then move pointer
-		// to next word
 		
+		//loop through docqueueholder and get the overall count for each document 
+		queue_t *newqueue=qopen();
+		int count1=1;
+		queue_t *docqueue1;
+		docrank_t *doc1;
+		docrank_t *docnew;
 		
+		while(count1<=idmax){
+			docrank_t *newdoc=(docrank_t*)malloc(sizeof(docrank_t));
+			newdoc->id=count1;
+			newdoc->rank=0;
+			
+			char webpage_path1[300];
+			sprintf(webpage_path1,"%s/%d",dir_path,count1);
+			
+			FILE *webpage1=fopen(webpage_path1,"r");
+			char url1[500];
+			fscanf(webpage1,"%s",url1);
+			strcpy(newdoc->url,url1);
+			fclose(webpage1);
+			
+			qput(newqueue,newdoc);
+			count1++;
+		}
+		
+		count1=1;
+		while((docqueue1=(queue_t*)qget(docqueueholder))!=NULL){
+			
+			while(count1<=idmax){
+				doc1=qsearch(docqueue1,docqsearchfn,(const void*)&count1);
+				docnew=qsearch(newqueue,docqsearchfn,(const void*)&count1);
+				
+				if(doc==NULL){
+					;
+				}
+				
+				else{
+					int rank=doc1->rank;
+					int newrank=docnew->rank;
+					docnew->rank=newrank+rank;
+				}					
+			}
+		}
 		
 		// print newline and > to prompt user for input
 		if(printit){
 			printf("%s\n",output);
-			qapply(docqueue,print_rank_queue);
+			qapply(newqueue,print_rank_queue);
 			printf("> ");
 		}
 		
