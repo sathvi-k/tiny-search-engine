@@ -119,9 +119,7 @@ queue_t* createqueryqueue(char* query){
 	
 	while(token!=NULL){
 		if(strcmp(token,"or")==0){
-			splitword_t *string=(splitword_t*)malloc(sizeof(splitword_t));
-			strcpy(string->ANDword,ANDstring);
-			qput(queue,string);
+			qput(queue,ANDstring);
 			sprintf(ANDstring,"%s","");
 		}
 		else{
@@ -129,9 +127,7 @@ queue_t* createqueryqueue(char* query){
 		}
 		token=strtok(NULL," ");
 	}
-	splitword_t *string1=(splitword_t*)malloc(sizeof(splitword_t));
-	strcpy(string1->ANDword,ANDstring);
-	qput(queue,string1);
+	qput(queue,ANDstring);;
 	return queue;
 }
 
@@ -147,21 +143,16 @@ int main(void){
 	
 	DIR *dir;
 	struct dirent *entry;
-
-	dir=opendir(dir_path);  
-	
+	dir=opendir(dir_path);	
 	while((entry=readdir(dir)) != NULL){
-		
 		if((strcmp(entry->d_name,".")==0) || (strcmp(entry->d_name,"..")==0)){
 			;                             
 		}
-
 		else{
 			idmax=idmax+1;
 		}
 	}          
 	closedir(dir);
-
 
 	index_t *index = indexload("index2");
 	hashtable_t *hashtable = index->hashtable;
@@ -169,11 +160,8 @@ int main(void){
 	bool printit=true;
   char input[1000];
 	
-  printf("> ");
-
-	
+  printf("> ");	
   while(fgets(input,1000,stdin)!=NULL){
-		
 		if(input[0] == '\n'){
 			printf("> ");
 		}
@@ -184,35 +172,28 @@ int main(void){
 		char *token = strtok(input," \t");
 		char output[1000]="";
 
-	
 		while (token != NULL){
-
 			// take word from string user enters and check that it only
 			// has alphabetical characters, and convert to lowercase letters
 			for (int i=0;i<strlen(token);i++){
 				if (isalpha(token[i])!=0){
 					token[i]=tolower(token[i]);
 				}
-				
 				//otherwise, there's numbers and punctuations, so it's invalid
 				else if (isalpha(token[i])==0){
 					printit=false;
 				}					
 			}
-
 			sprintf(output,"%s%s ",output,token);
-			
 			token = strtok(NULL," \t");	
 		}
 
-	
 		queue_t *queryqueue=createqueryqueue(output);
-		splitword_t *ANDquery;
+		char *ANDquery;
 		
-		while((ANDquery=(splitword_t*)qget(queryqueue))!=NULL){
+		while((ANDquery=(char*)qget(queryqueue))!=NULL){
 			queue_t *docqueue=qopen();
 			int idcount=1;
-
 			
 			while(idcount<=idmax){
 				docrank_t *docrank = (docrank_t*)malloc(sizeof(docrank_t));
@@ -232,22 +213,17 @@ int main(void){
 				idcount++;
 			}
 			
-			
-			char *ANDtoken=strtok(ANDquery->ANDword," ");
-			
+			char *ANDtoken=strtok(ANDquery," ");
 			while(ANDtoken!=NULL){
-				
 				if(strcmp(ANDtoken,"and")==0 || strlen(ANDtoken)<3){
 					;
 				}
-				
 				else{   
 					word_t *foundword;
 					//search for token in hashtable using hsearch
 					foundword=hsearch(hashtable,hsearchfn,ANDtoken,strlen(ANDtoken));
 					
-					if(foundword!=NULL){
-						
+					if(foundword!=NULL){		
 						int id=1;
 						
 						while(id<=idmax){
@@ -313,12 +289,12 @@ int main(void){
 			count1++;
 		}
 		
-		count1=1;
+		int count2=1;
 		while((docqueue1=(queue_t*)qget(docqueueholder))!=NULL){
 			
-			while(count1<=idmax){
-				doc1=qsearch(docqueue1,docqsearchfn,(const void*)&count1);
-				docnew=qsearch(newqueue,docqsearchfn,(const void*)&count1);
+			while(count2<=idmax){
+				doc1=qsearch(docqueue1,docqsearchfn,(const void*)&count2);
+				docnew=qsearch(newqueue,docqsearchfn,(const void*)&count2);
 				
 				if(doc1==NULL){
 					;
@@ -329,7 +305,7 @@ int main(void){
 					int newrank=docnew->rank;
 					docnew->rank=newrank+rank;
 				}
-				count1++;
+				count2++;
 			}
 			qapply(docqueue1,docrankclose);
 			free(docqueue1);
