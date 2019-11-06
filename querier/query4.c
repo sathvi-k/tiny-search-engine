@@ -39,6 +39,15 @@ typedef struct docrank{
 	char url[500];
 }docrank_t;
 
+typedef struct ANDquery{
+	char query[1000];
+}ANDquery_t;
+
+void ANDqueryclose(void *data){
+	ANDquery_t *word=(ANDquery_t*)data;                                                                                                                                                                                                                                         
+  free(word);  
+}
+
 void docrankclose(void *data){
 	docrank_t *doc=(docrank_t*)data;
 	free(doc);
@@ -105,6 +114,11 @@ void print_rank_queue(void *data){
 	printf("rank:%d : doc:%d : %s\n",rank,id,url);
 }
 
+void print_anything(void *elementp){                                                                                                                                                                                                                                              
+  ANDquery_t *word=(ANDquery_t*)elementp;                                                                                                                                                                                                                                         
+  printf("word in queue:%s\n", word->query);                                                                                                                                                                                                                              
+}
+
 queue_t* createqueryqueue(char* query){
 	queue_t *queue=qopen();
 	char *token;
@@ -114,7 +128,9 @@ queue_t* createqueryqueue(char* query){
 	
 	while(token!=NULL){
 		if(strcmp(token,"or")==0){
-			qput(queue,ANDstring);
+			ANDquery_t *stringput=(ANDquery_t*)malloc(sizeof(ANDquery_t));
+			strcpy(stringput->query,ANDstring);
+			qput(queue,stringput);
 			sprintf(ANDstring,"%s","");
 		}
 		else{
@@ -122,7 +138,9 @@ queue_t* createqueryqueue(char* query){
 		}
 		token=strtok(NULL," ");
 	}
-	qput(queue,ANDstring);
+	ANDquery_t *stringput=(ANDquery_t*)malloc(sizeof(ANDquery_t));
+	strcpy(stringput->query,ANDstring);
+	qput(queue,stringput);
 	return queue;
 }
 
@@ -184,9 +202,11 @@ int main(void){
 		}
 
 		queue_t *queryqueue=createqueryqueue(output);
-		char *ANDquery;
+		qapply(queryqueue,print_anything);
+		ANDquery_t *ANDqueryt;
 		
-		while((ANDquery=(char*)qget(queryqueue))!=NULL){
+		while((ANDqueryt=(ANDquery_t*)qget(queryqueue))!=NULL){
+			char* ANDquery=ANDqueryt->query;
 			queue_t *docqueue=qopen();
 			int idcount=1;
 			
@@ -210,9 +230,11 @@ int main(void){
 			
 			char *ANDtoken=strtok(ANDquery," ");
 			while(ANDtoken!=NULL){
+				
 				if(strcmp(ANDtoken,"and")==0 || strlen(ANDtoken)<3){
 					;
 				}
+				
 				else{   
 					word_t *foundword;
 					//search for token in hashtable using hsearch
@@ -249,15 +271,18 @@ int main(void){
 							id++;	
 						}
 					}
+					
 					else{
 						printit=false;
 						printf("word not in index\n");
 					}
+					
 				}
 				ANDtoken=strtok(NULL," ");
 			}
 			qput(docqueueholder,docqueue);
 		}
+		qapply(queryqueue,ANDqueryclose);
 		
 		//loop through docqueueholder and get the overall count for each document 
 		queue_t *newqueue=qopen(); //queue holding a docrank object for each document in pages directory and total end rank (this is the one we print at the end)
@@ -284,8 +309,10 @@ int main(void){
 			count1++;
 		}
 		
- 		int count2=1;
+ 		
 		while((docqueue1=(queue_t*)qget(docqueueholder))!=NULL){
+			
+			int count2=1;
 			while(count2<=idmax){
 				doc1=qsearch(docqueue1,docqsearchfn,(const void*)&count2); //
 				docnew=qsearch(newqueue,docqsearchfn,(const void*)&count2);
@@ -301,7 +328,6 @@ int main(void){
 				}
 				count2++;
 			}
-			count2=1;
 		  qapply(docqueue1,docrankclose);
 			free(docqueue1);
 		}
