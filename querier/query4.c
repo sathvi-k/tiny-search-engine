@@ -39,11 +39,6 @@ typedef struct docrank{
 	char url[500];
 }docrank_t;
 
-typedef struct splitword{
-	char ANDword[200];
-}splitword_t;
-
-
 void docrankclose(void *data){
 	docrank_t *doc=(docrank_t*)data;
 	free(doc);
@@ -127,7 +122,7 @@ queue_t* createqueryqueue(char* query){
 		}
 		token=strtok(NULL," ");
 	}
-	qput(queue,ANDstring);;
+	qput(queue,ANDstring);
 	return queue;
 }
 
@@ -265,7 +260,7 @@ int main(void){
 		}
 		
 		//loop through docqueueholder and get the overall count for each document 
-		queue_t *newqueue=qopen();
+		queue_t *newqueue=qopen(); //queue holding a docrank object for each document in pages directory and total end rank (this is the one we print at the end)
 		int count1=1;
 		queue_t *docqueue1;
 		docrank_t *doc1;
@@ -289,11 +284,10 @@ int main(void){
 			count1++;
 		}
 		
-		int count2=1;
+ 		int count2=1;
 		while((docqueue1=(queue_t*)qget(docqueueholder))!=NULL){
-			
 			while(count2<=idmax){
-				doc1=qsearch(docqueue1,docqsearchfn,(const void*)&count2);
+				doc1=qsearch(docqueue1,docqsearchfn,(const void*)&count2); //
 				docnew=qsearch(newqueue,docqsearchfn,(const void*)&count2);
 				
 				if(doc1==NULL){
@@ -301,13 +295,14 @@ int main(void){
 				}
 				
 				else{
-					int rank=doc1->rank;
+					int docsrank=doc1->rank;
 					int newrank=docnew->rank;
-					docnew->rank=newrank+rank;
+					docnew->rank=newrank+docsrank;
 				}
 				count2++;
 			}
-			qapply(docqueue1,docrankclose);
+			count2=1;
+		  qapply(docqueue1,docrankclose);
 			free(docqueue1);
 		}
 		
