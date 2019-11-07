@@ -171,15 +171,16 @@ int main(void){
   printf("> ");	
   while(fgets(input,1000,stdin)!=NULL){
 		if(input[0] == '\n'){
-			printf("> ");
+			printit=false;
 		}
 		
 		input[strlen(input)-1]='\0';
 		
     // split user's input by spaces and tabs
-		char *token = strtok(input," \t");
-		char output[1000]="";
-
+		char *token = strtok(input," \t");                                                                                                
+		char output[1000]="";                                                                                                             
+		char printedoutput[1000]="";                                                                                                      
+		char *prevtoken="";
 		while (token != NULL){
 			// take word from string user enters and check that it only
 			// has alphabetical characters, and convert to lowercase letters
@@ -192,12 +193,37 @@ int main(void){
 					printit=false;
 				}					
 			}
-			sprintf(output,"%s%s ",output,token);
-			token = strtok(NULL," \t");	
-		}
-
+			if(strcmp(prevtoken,"and")==0 && strcmp(token,"and")==0){                                                                       
+				printit=false;                                                                                                                
+			}                                                                                                                               
+			else if(strcmp(prevtoken,"or")==0 && strcmp(token,"or")==0){                                                                    
+				printit=false;                                                                                                                
+			}                                                                                                                               
+			else if(strcmp(prevtoken,"and")==0 && strcmp(token,"or")==0){                                                                   
+				printit=false;                                                                                                                
+			}                                                                                                                               
+			else if(strcmp(prevtoken,"or")==0 && strcmp(token,"and")==0){                                                                   
+				printit=false;                                                                                                                
+			}                                                                                                                               
+			else if(strcmp(prevtoken,"")==0 && strcmp(token,"and")==0){                                                                     
+				printit=false;                                                                                                                
+			}                                                                                                                               
+			else if(strcmp(prevtoken,"")==0 && strcmp(token,"or")==0){                                                                      
+				printit=false;                                                                                                                
+			}                                                                                                                               
+      
+			sprintf(output,"%s%s ",output,token);                                                                                           
+			sprintf(printedoutput,"%s%s ",printedoutput,token);                                                                             
+			prevtoken=token;                                                                                                                
+			token = strtok(NULL," \t");                                                                                                     
+		}                                                                                                                                 
+    
+		if(strcmp(prevtoken,"and")==0 || strcmp(prevtoken,"or")==0){                                                                      
+			printit=false;                                                                                                                  
+		}                              
+		
 		queue_t *queryqueue=createqueryqueue(output);
-		qapply(queryqueue,print_anything);
+		//qapply(queryqueue,print_anything);
 		ANDquery_t *ANDqueryt;
 		
 		while((ANDqueryt=(ANDquery_t*)qget(queryqueue))!=NULL){
@@ -331,7 +357,7 @@ int main(void){
 		
 		// print newline and > to prompt user for input
 		if(printit){
-			printf("%s\n",output);
+			printf("%s\n",printedoutput);
 			qapply(newqueue,print_rank_queue);
 			printf("> ");
 		}

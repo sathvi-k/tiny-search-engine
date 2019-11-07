@@ -61,7 +61,7 @@ int32_t indexsave(index_t *indexp, char *indexnm){
 	hashtable_t *hash=indexp->hashtable;
 	
   //open the file             
-  char file_path[50];
+  char file_path[500];
 	char *path= "../indexer";
   sprintf(file_path,"%s/%s",path,indexnm); 
 
@@ -76,7 +76,7 @@ int32_t indexsave(index_t *indexp, char *indexnm){
 
 
 index_t *indexload(char *indexnm){                                           
-  char file_path[50];                                                        
+  char file_path[500];                                                        
   char *path= "../indexer";                                                  
   sprintf(file_path,"%s/%s",path,indexnm);                                   
                                                                              
@@ -87,7 +87,7 @@ index_t *indexload(char *indexnm){
                                                                              
   FILE *indexname=fopen(file_path,"r");                                      
                                                                              
-  char cp[50];                                                               
+  char cp[500];                                                               
   char countsp[500];                                                         
 
 	
@@ -98,7 +98,7 @@ index_t *indexload(char *indexnm){
       qp=qopen();                                                            
       wordt->queue=qp;                                                       
                                                                              
-      char idncount[50];                                                     
+      char idncount[500];                                                     
       strcpy(idncount, countsp);                                             
       //printf("%s\n",idncount);                                                                       
       char *token = strtok(idncount, " ");                                   

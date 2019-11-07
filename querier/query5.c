@@ -20,6 +20,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+FILE* goutputfile;
+
 typedef struct index{
 	hashtable_t *hashtable;
 }index_t;
@@ -113,6 +115,17 @@ void print_rank_queue(void *data){
 	printf("rank:%d : doc:%d : %s\n",rank,id,url);
 }
 
+void fprint_rank_queue(void *data){
+	docrank_t *doc=(docrank_t*)data;
+	int rank=doc->rank;
+	int id=doc->id;
+	char *url=doc->url;
+	if(rank==2147483647){
+		rank=0;
+	}
+	fprintf(goutputfile,"rank:%d : doc:%d : %s\n",rank,id,url);
+}
+
 void print_anything(void *elementp){                                                                                                                                                                                                                                              
   ANDquery_t *word=(ANDquery_t*)elementp;                                                                                                           
   printf("word in queue:%s\n", word->query);                                                                                                                                                                                                                              
@@ -197,8 +210,15 @@ int main(int argc,char* argv[]){
 		
 		printf("> ");	
 		while(fgets(input,1000,stdin)!=NULL){
+			
 			if(input[0] == '\n'){
-				printf("> ");
+				printit=false;
+			}
+			else if(input[0] == '\t'){
+				printit=false;
+			}	
+			else if(input[strlen(input)-2] == '\t'){
+				printit=false;
 			}
 			
 			input[strlen(input)-1]='\0';
@@ -207,6 +227,7 @@ int main(int argc,char* argv[]){
 			char *token = strtok(input," \t");
 			char output[1000]="";
 			char printedoutput[1000]="";
+			char *prevtoken="";
 			
 			while (token != NULL){
 				// take word from string user enters and check that it only
@@ -220,13 +241,38 @@ int main(int argc,char* argv[]){
 						printit=false;
 					}					
 				}
+
+				if(strcmp(prevtoken,"and")==0 && strcmp(token,"and")==0){
+					printit=false;
+				}
+				else if(strcmp(prevtoken,"or")==0 && strcmp(token,"or")==0){
+					printit=false;
+				}
+				else if(strcmp(prevtoken,"and")==0 && strcmp(token,"or")==0){
+					printit=false;
+				}
+				else if(strcmp(prevtoken,"or")==0 && strcmp(token,"and")==0){
+					printit=false;
+				}
+				else if(strcmp(prevtoken,"")==0 && strcmp(token,"and")==0){
+					printit=false;
+				}
+				else if(strcmp(prevtoken,"")==0 && strcmp(token,"or")==0){
+					printit=false;
+				}
+				
 				sprintf(output,"%s%s ",output,token);
 				sprintf(printedoutput,"%s%s ",printedoutput,token);
-				token = strtok(NULL," \t");	
+				prevtoken=token;
+				token = strtok(NULL," \t");
+			}
+
+			if(strcmp(prevtoken,"and")==0 || strcmp(prevtoken,"or")==0){
+				printit=false;
 			}
 			
 			queue_t *queryqueue=createqueryqueue(output);
-			qapply(queryqueue,print_anything);
+			//qapply(queryqueue,print_anything);
 			ANDquery_t *ANDqueryt;
 			
 			while((ANDqueryt=(ANDquery_t*)qget(queryqueue))!=NULL){
@@ -299,7 +345,7 @@ int main(int argc,char* argv[]){
 						
 						else{
 							printit=false;
-							printf("word not in index\n");
+							//printf("word not in index\n");
 						}
 						
 					}
@@ -364,7 +410,6 @@ int main(int argc,char* argv[]){
 				qapply(newqueue,print_rank_queue);
 				printf("> ");
 			}
-			
 			else{
 				printf("[invalid query]\n");
 				printf("> ");
@@ -434,7 +479,8 @@ int main(int argc,char* argv[]){
 
 			FILE *queryfile;
 			FILE *outputfile=fopen(myoutput, "w");
-
+			goutputfile=outputfile;
+			
 			if((queryfile=fopen(myqueries, "r"))){
 				;
 			}
@@ -449,10 +495,17 @@ int main(int argc,char* argv[]){
 			bool printit=true;
 			char input[1000];
 			
-			printf("> ");	
+			fprintf(outputfile,"> ");	
 			while(fgets(input,1000,queryfile)!=NULL){
+				
 				if(input[0] == '\n'){
-					printf("> ");
+					printit=false;
+				}
+				else if(input[0] == '\t'){
+					printit=false;
+				}		
+				else if(input[strlen(input)-2] == '\t'){
+					printit=false;
 				}
 				
 				input[strlen(input)-1]='\0';
@@ -461,6 +514,7 @@ int main(int argc,char* argv[]){
 				char *token = strtok(input," \t");
 				char output[1000]="";
 				char printedoutput[1000]="";
+				char *prevtoken="";
 				
 				while (token != NULL){
 					// take word from string user enters and check that it only
@@ -474,13 +528,39 @@ int main(int argc,char* argv[]){
 							printit=false;
 						}					
 					}
+
+					if(strcmp(prevtoken,"and")==0 && strcmp(token,"and")==0){
+						printit=false;
+					}
+					else if(strcmp(prevtoken,"or")==0 && strcmp(token,"or")==0){
+						printit=false;
+					}
+					else if(strcmp(prevtoken,"and")==0 && strcmp(token,"or")==0){
+						printit=false;
+					}
+					else if(strcmp(prevtoken,"or")==0 && strcmp(token,"and")==0){
+						printit=false;
+					}
+					else if(strcmp(prevtoken,"")==0 && strcmp(token,"and")==0){
+						printit=false;
+					}
+					else if(strcmp(prevtoken,"")==0 && strcmp(token,"or")==0){
+						printit=false;
+					}
+					
 					sprintf(output,"%s%s ",output,token);
-					sprintf(output,"%s%s ",printedoutput,token);
+					sprintf(printedoutput,"%s%s ",printedoutput,token);
+					prevtoken=token;
 					token = strtok(NULL," \t");	
 				}
+
+				if(strcmp(prevtoken,"and")==0 || strcmp(prevtoken,"or")==0){
+					printit=false;
+				}
+				
 				
 				queue_t *queryqueue=createqueryqueue(output);
-				qapply(queryqueue,print_anything);
+				//qapply(queryqueue,print_anything);
 				ANDquery_t *ANDqueryt;
 				
 				while((ANDqueryt=(ANDquery_t*)qget(queryqueue))!=NULL){
@@ -553,7 +633,7 @@ int main(int argc,char* argv[]){
 							
 							else{
 								printit=false;
-								fprintf(outputfile, "word not in index\n");
+								//fprintf(outputfile, "word not in index\n");
 							}
 							
 						}
@@ -615,26 +695,31 @@ int main(int argc,char* argv[]){
 				// print newline and > to prompt user for input
 				if(printit){
 					fprintf(outputfile,"%s\n",printedoutput);
-					qapply(newqueue,print_rank_queue);
+					qapply(newqueue,fprint_rank_queue);
 					fprintf(outputfile,"> ");
 				}
 				
 				else{
+					//fprintf(outputfile,"%s\n",printedoutput);
 					fprintf(outputfile,"[invalid query]\n");
 					fprintf(outputfile,"> ");
-					printit=true;
+					printit=true;	
 				}
 				qapply(newqueue,docrankclose);
 				qclose(newqueue);
 			}
-			fclose(queryfile);
+			
 			qclose(docqueueholder);
 			
 			happly(hashtable,word_delete);
 			hclose(hashtable);
 			free(index);
-			
+
+			fprintf(outputfile,"^D\n");
 			printf("^D\n");
+			
+			fclose(queryfile);
+			fclose(outputfile);
 			return 0;
 		}
 		else{
