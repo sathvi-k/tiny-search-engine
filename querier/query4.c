@@ -43,11 +43,6 @@ typedef struct ANDquery{
 	char query[1000];
 }ANDquery_t;
 
-void ANDqueryclose(void *data){
-	ANDquery_t *word=(ANDquery_t*)data;                                                                                                                                                                                                                                         
-  free(word);  
-}
-
 void docrankclose(void *data){
 	docrank_t *doc=(docrank_t*)data;
 	free(doc);
@@ -225,6 +220,7 @@ int main(void){
 				fclose(webpage);
 				
 				qput(docqueue,docrank);
+				
 				idcount++;
 			}
 			
@@ -279,11 +275,12 @@ int main(void){
 					
 				}
 				ANDtoken=strtok(NULL," ");
+
 			}
 			qput(docqueueholder,docqueue);
+			free(ANDqueryt);
 		}
-		qapply(queryqueue,ANDqueryclose);
-		
+		qclose(queryqueue);
 		//loop through docqueueholder and get the overall count for each document 
 		queue_t *newqueue=qopen(); //queue holding a docrank object for each document in pages directory and total end rank (this is the one we print at the end)
 		int count1=1;
@@ -329,7 +326,7 @@ int main(void){
 				count2++;
 			}
 		  qapply(docqueue1,docrankclose);
-			free(docqueue1);
+			qclose(docqueue1);
 		}
 		
 		// print newline and > to prompt user for input
@@ -347,8 +344,7 @@ int main(void){
 		qapply(newqueue,docrankclose);
 		qclose(newqueue);
 	}
-	
-	
+ 
 	qclose(docqueueholder);
 	
 	happly(hashtable,word_delete);
