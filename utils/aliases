@@ -1,0 +1,5 @@
+alias h=history
+alias j=jobs
+alias emacs='emacs -nw'
+alias clean='rm -f *~ \#*\#'
+alias more=less
