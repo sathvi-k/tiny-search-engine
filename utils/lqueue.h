@@ -12,18 +12,18 @@ typedef void lqueue_t;
 lqueue_t* lqopen(void);        
 
 /* deallocate a locked-queue, frees everything in it */
-void* lqclose(void *arg);   
+void lqclose(lqueue_t *lqp);   
 
 /* put element at the end of the locked-queue
  * returns 0 if successful; nonzero otherwise 
  */
-void* lqput(void *arg); 
+int32_t lqput(lqueue_t *lqp, void *elementp); 
 
 /* get the first element from locked-queue, removing it from the locked-queue */
-void* lqget(void *arg);
+void* lqget(lqueue_t *lqp);
 
 /* apply a function to every element of the locked-queue */
-void* lqapply(void *arg);
+void lqapply(lqueue_t *lqp, void (*fn)(void*elementp));
 
 /* search a locked-queue using a supplied boolean function
  * skeyp -- a key to search for
@@ -34,5 +34,5 @@ void* lqapply(void *arg);
  *          -- returns TRUE or FALSE as defined in bool.h
  * returns a pointer to an element, or NULL if not found
  */
-void* lqsearch(void* arg);
+void* lqsearch(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp);
 

@@ -8,31 +8,28 @@
  * Description: Test a locked-queue and all of its functions for a single thread 
  * 
  */
-#include <stdint.h>                                                                                               
-#include <stdbool.h>                                                                                                          
-#include "lqueue.h"                                                                                               
-#include <stdlib.h>                                                                                               
-#include <stdio.h>                                                                                                
+#include <stdint.h>                                                                                        
+#include <stdbool.h>                                                                          
+#include <lqueue.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <pthread.h>
 
-typedef struct car_t{                                                                                                                   
-  int year;                                                                                                                             
-  double price;                                                                                                                         
+typedef struct car_t{           
+  int year;                                                                                                  double price;
 }car_t;
 
-typedef struct arguments{                                                                                                               
-  lqueue_t *queue;                                                                                                                       
-  void *element;                                                                                                                        
-  void (*fn)(void* elementp);                                                                                                           
-  bool (*searchfn)(void* elementp,const void* keyp);                                                                                    
-  const void* skeyp;                                                                                                                    
+typedef struct arguments{
+	lqueue_t *queue;
+	void *element;
+	void (*fn)(void* elementp);
+	bool (*searchfn)(void* elementp,const void* keyp);
+	const void* skeyp;
 }arguments_t;    
 
-car_t* make_car(int year,double price){                                                                                          
-                                                                                                                                        
-  car_t *c;                                                                                                                             
-                                                                                                                                        
-  if(!(c=(car_t*)malloc(sizeof(car_t)))){                                                                                               
+car_t* make_car(int year,double price){
+	car_t *c;
+	if(!(c=(car_t*)malloc(sizeof(car_t)))){                                                                                               
     printf("[Error: malloc failed allocating element]\n");                                                                              
     return NULL;                                                                                                                        
   }                                                                                                                                     
