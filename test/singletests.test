@@ -1,0 +1,6 @@
+#!/bin/bash
+
+runtest.sh lqtest
+runtest.sh lqtest1
+runtest.sh lqtest2
+runtest.sh lqtest3

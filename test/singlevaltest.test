@@ -1,0 +1,24 @@
+#!/bin/bash
+
+echo "lqtest:"
+valgrind --leak-check=full lqtest 2> >(grep -i "0 ERRORS")
+valgrind --leak-check=full lqtest 2> >(grep -i "no leaks")
+
+echo ""
+
+echo "lqtest1:"
+valgrind --leak-check=full lqtest1 2> >(grep -i "0 ERRORS")
+valgrind --leak-check=full lqtest1 2> >(grep -i "no leaks")
+
+echo ""
+
+echo "lqtest2:"
+valgrind --leak-check=full lqtest2 2> >(grep -i "0 ERRORS")
+valgrind --leak-check=full lqtest2 2> >(grep -i "no leaks")
+
+echo ""
+
+echo "lqtest3:"
+valgrind --leak-check=full lqtest3 2> >(grep -i "0 ERRORS")
+valgrind --leak-check=full lqtest3 2> >(grep -i "no leaks")
+

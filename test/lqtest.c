@@ -138,8 +138,7 @@ int main(void){
 	//free(rcar2);
 	//free(rcar3);
 	//free(remover);
-	lqclose(lqp);
-	lqclose(lq2p);
+	
 	free(car);
 	free(car1);
 	free(car2);
@@ -147,8 +146,7 @@ int main(void){
 	free(car4);
 	free(car5);
 	free(car6);
-	free(lqp);
-	free(lq2p);
-
+	lqclose(lqp);
+	lqclose(lq2p);
 	exit(EXIT_SUCCESS);
 }
