@@ -25,14 +25,16 @@ typedef struct ilqueue_t{
 /* create an empty locked-queue */
 lqueue_t* lqopen(void){
   ilqueue_t *lqp;
-  if(!(lqp=(ilqueue_t *)malloc(sizeof(ilqueue_t)))){
+	pthread_mutex_t mq;
+	
+	if(!(lqp=(ilqueue_t *)malloc(sizeof(ilqueue_t)))){
     printf("[Error: malloc failed allocating locked-queue]\n");
     return NULL; 
   }
-  queue_t *q=qopen();
-  pthread_mutex_t mq;
-  pthread_mutex_init(&mq,NULL); //initializes the mutex associated with the queue "q" 
-  lqp->queue=q;
+  
+  pthread_mutex_init(&mq,NULL); //initializes the mutex associated
+																//with the queue of the lqp
+  lqp->queue=qopen();
   lqp->mutex=mq;
   lqueue_t *lqt=(lqueue_t*)lqp;
   return lqt;
@@ -41,9 +43,11 @@ lqueue_t* lqopen(void){
 /* deallocate a locked-queue, frees everything in it */
 void lqclose(lqueue_t *lqp){
 	ilqueue_t *ilqp=(ilqueue_t*)lqp;
-	qclose(ilqp->queue);
 	pthread_mutex_t m=ilqp->mutex;
-	pthread_mutex_unlock(&m); // function below, pthread_mutex_destroy(), fails if mutex is locked
+	pthread_mutex_lock(&m);
+	qclose(ilqp->queue);
+	pthread_mutex_unlock(&m); // function below, pthread_mutex_destroy(),
+	                          // fails if mutex is locked
 	pthread_mutex_destroy(&m); // frees the resources (queue) allocated for mutex
 }
 
@@ -96,4 +100,15 @@ void* lqsearch(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp)
   void* lsearch=qsearch(ilqp->queue,searchfn,skeyp);
   pthread_mutex_unlock(&m);
   return lsearch;
+}
+
+void lqsnp(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp){
+	ilqueue_t *ilqp=(ilqueue_t*)lqp;
+	pthread_mutex_t m=ilqp->mutex;
+	pthread_mutex_lock(&m);
+	void* ep=qsearch(ilqp->queue,searchfn,skeyp);
+	if(ep==NULL){
+		qput(ilqp->queue,ep);
+	}
+	pthread_mutex_unlock(&m);
 }
