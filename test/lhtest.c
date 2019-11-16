@@ -1,4 +1,4 @@
-/* duallhtest1.c --- test the hash.c module
+/* lhtest1.c --- test the hash.c module
  * 
  * 
  * Author: John B. Kariuki Jr. Hanna , Aya , Sathvika
@@ -18,9 +18,6 @@
 #include <lqueue.h>
 #include <lhash.h>
 #include <string.h>
-#include <pthread.h>
-
-lhashtable_t *lht;
 
 typedef struct car_t{
   int year;
@@ -51,9 +48,7 @@ bool searchfn(void* elementp,const void* searchkeyp){
   pikey = (char*)searchkeyp;
 	char *keystr=pikey;
 	char *cp2name=cp2->name;
-  //printf("searchkeyp:%p\n",searchkeyp);
-	//printf("keyval:%d\n",keyval);
-	//printf("year:%d\n",cp2->year);
+
   if(strcmp(keystr,cp2name)==0){
     return true;
   }
@@ -62,12 +57,7 @@ bool searchfn(void* elementp,const void* searchkeyp){
   }
 }            
 
-void test_lhsnp(lhashtable_t *lhp){
-	lhsnp(lhp,);
-}
-
 int main(void){
-	pthread_t tid1, tid2l;
 	
 	car_t *car;
   car_t *car1;
@@ -80,30 +70,34 @@ int main(void){
   car2=make_car(2000,200,"Pat");
 	car3=make_car(2003,500,"Tracy");
   car4=make_car(2009,100,"Allan");
-	
+ 	
 	const char *ca = car->name;
 	const char *cb = car1->name;
 	const char *cc = car2->name;
 	const char *cd = car3->name;
 	const char *ce = car4->name; 
 	
-	lht = lhopen(5);
+	lhashtable_t *lht = lhopen(5);
 	
-	lhput(lht,(void*)car,ca,sizeof(*ca));
-	lhput(lht,(void*)car1,cb,sizeof(*cb));
-	lhput(lht,(void*)car2,cc,sizeof(*cc));
-	lhput(lht,(void*)car3,cd,sizeof(*cd));
-	lhput(lht,(void*)car4,ce,sizeof(*ce));
-
-	printf("Hashtable initially: \n");
-	lhapply(lht, print_anything);
-
-	if(pthread_create(&tid1,NULL,lhget
-
-	
-	car_t *searchr=(car_t*)lhsearch(lht,searchfn,cb,sizeof(*cb));
-	printf("search result:%s,%d\n",searchr->name,searchr->year);
+	int32_t res1=lhput(lht,(void*)car,ca,sizeof(*ca));
+	int32_t res2=lhput(lht,(void*)car1,cb,sizeof(*cb));
+	int32_t res3=lhput(lht,(void*)car2,cc,sizeof(*cc));
+	int32_t res4=lhput(lht,(void*)car3,cd,sizeof(*cd));
+	int32_t res5=lhput(lht,(void*)car4,ce,sizeof(*ce));
 	
 	lhapply(lht,print_anything);
+
+	free(car);
+	free(car1);
+	free(car2);
+	free(car3);
+	free(car4);
 	lhclose(lht);
+	
+	if(res1==0 && res2==0 && res3==0 && res4==0 && res5==0){
+		exit(EXIT_SUCCESS);
+	}
+	else{
+		exit(EXIT_FAILURE);
+	}
 }

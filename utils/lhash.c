@@ -25,14 +25,14 @@ typedef struct ilhashtable_t{
 /* lhopen -- opens a locked hash table with initial size hsize */
 lhashtable_t *lhopen(uint32_t hsize){
 	ilhashtable_t *lhp;
-	pthread_mutex_t mh;
+ 
 	if(!(lhp=(ilhashtable_t *)malloc(sizeof(ilhashtable_t)))){
     printf("[Error: malloc failed allocating locked-hashtable]\n");
     return NULL;
-  }   
+  }
+	
 	lhp->hash=hopen(hsize);
-	pthread_mutex_init(&mh,NULL);
-	lhp->mutex=mh;
+	pthread_mutex_init(&(lhp->mutex),NULL);
 	lhashtable_t *lht=(lhashtable_t*)lhp;
 	return lht;
 }
@@ -40,11 +40,11 @@ lhashtable_t *lhopen(uint32_t hsize){
 /* lhclose -- closes a locked hash table */
 void lhclose(lhashtable_t *lhp){
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
-	pthread_mutex_t m=ilhp->mutex;
-	pthread_mutex_lock(&m);
+	pthread_mutex_lock(&(ilhp->mutex));
 	hclose(ilhp->hash);
-	pthread_mutex_unlock(&m);
-	pthread_mutex_destroy(&m);
+	pthread_mutex_unlock(&(ilhp->mutex));
+	pthread_mutex_destroy(&(ilhp->mutex));
+	free(ilhp);
 }
 
 /* lhput -- puts an entry into a locked hash table under designated key
@@ -53,19 +53,18 @@ void lhclose(lhashtable_t *lhp){
 int32_t lhput(lhashtable_t *lhp, void *ep, const char *key, int keylen){
 	int32_t return_value;
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
-	pthread_mutex_t m=ilhp->mutex;
-	pthread_mutex_lock(&m);
+	pthread_mutex_lock(&(ilhp->mutex));
 	return_value=hput(ilhp->hash,ep,key,keylen);
-	pthread_mutex_unlock(&m);
+	pthread_mutex_unlock(&(ilhp->mutex));
 	return return_value;
 }
+
 /* lhapply -- applies a function to every entry in locked hash table */
 void lhapply(lhashtable_t *lhp, void (*fn)(void* ep)){
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
-	pthread_mutex_t m=ilhp->mutex;
-	pthread_mutex_lock(&m);
+	pthread_mutex_lock(&(ilhp->mutex));
 	happly(ilhp->hash,fn);
-	pthread_mutex_unlock(&m);
+	pthread_mutex_unlock(&(ilhp->mutex));
 }
 
 /* lhsearch - searches for an entry under a designated key using a
@@ -74,10 +73,9 @@ void lhapply(lhashtable_t *lhp, void (*fn)(void* ep)){
  */
 void *lhsearch(lhashtable_t *lhp, bool (*searchfn)(void* elementp, const void* searchkeyp), const char *key, int32_t keylen){
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
-	pthread_mutex_t m=ilhp->mutex;
-	pthread_mutex_lock(&m);
+	pthread_mutex_lock(&(ilhp->mutex));
 	void* lsearch=hsearch(ilhp->hash,searchfn,key,keylen);
-	pthread_mutex_unlock(&m);
+	pthread_mutex_unlock(&(ilhp->mutex));
 	return lsearch;
 }
 
@@ -85,22 +83,20 @@ void *lhsearch(lhashtable_t *lhp, bool (*searchfn)(void* elementp, const void* s
  * If the key does not exist, returns NULL */
 void *lhget(lhashtable_t *lhp, const char *key, int32_t keylen){
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
-	pthread_mutex_t m=ilhp->mutex;
-	pthread_mutex_lock(&m);
+	pthread_mutex_lock(&(ilhp->mutex));
 	void* lget=hqget(ilhp->hash,key,keylen);
-	pthread_mutex_unlock(&m);
+	pthread_mutex_unlock(&(ilhp->mutex));
 	return lget;
 }
 
 void lhsnp(lhashtable_t *lhp,bool (*searchfn)(void* elementp, const void* searchkeyp),const char *key,int32_t keylen){
   ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
-  pthread_mutex_t m=ilhp->mutex;
-  pthread_mutex_lock(&m);  
+  pthread_mutex_lock(&(ilhp->mutex));  
   void* ep=hsearch(ilhp->hash,searchfn,key,keylen);
 	if(ep==NULL){
 		hput(ilhp->hash,ep,key,keylen);
 	}
-	pthread_mutex_unlock(&m);
+	pthread_mutex_unlock(&(ilhp->mutex));
 }  
 
 

@@ -16,7 +16,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-bool good_result=true;
 pthread_t tid1;
 pthread_t tid2;
 
@@ -85,55 +84,63 @@ bool searchfn(void* elementp,const void* keyp){
   }                                                                      
 }      
 
-void* put(void* arg){
+void* get(void* arg){
 	arguments_t *argt=(arguments_t*)arg;
-	int32_t result=lqput(argt->queue,argt->element);
-
-	if(result==0){
-		;
-	}
-	else{
-		good_result=false;
-	}
+	lqget(argt->queue);
 	return NULL;
 }
 
-void t1(arguments_t *arg,void*(*put)(void* arg)){	
-	pthread_create(&tid1,NULL,put,(void*)arg);
+void t1(arguments_t *arg,void*(*get)(void* arg)){	
+	pthread_create(&tid1,NULL,get,(void*)arg);
 }
 
-void t2(arguments_t *arg,void*(*put)(void* arg)){
+void t2(arguments_t *arg,void*(*get)(void* arg)){
 	sleep(2);
-	pthread_create(&tid2,NULL,put,(void*)arg);
+	pthread_create(&tid2,NULL,get,(void*)arg);
 }
 
 int main(void){
 	lqueue_t *lqp=lqopen();
 	
 	car_t *car=make_car(2000,200);                                                                                                    
-  car_t *car1=make_car(2019,1700);                                                                                                   
+  car_t *car1=make_car(2019,1700);
 
+	lqput(lqp,(void*)car);
+	lqput(lqp,(void*)car1);
+
+	lqapply(lqp,print_anything);
+	printf("--------------------------------\n");
+	
 	//test lput
-	arguments_t *arg1=make_argument(lqp,(void*)car,NULL,NULL,NULL);
-	arguments_t *arg2=make_argument(lqp,(void*)car1,NULL,NULL,NULL);
-	t1(arg1,put);
-	t2(arg2,put);
+	arguments_t *arg1=make_argument(lqp,NULL,NULL,NULL,NULL);
+	arguments_t *arg2=make_argument(lqp,NULL,NULL,NULL,NULL);
+	t1(arg1,get);
+	t2(arg2,get);
 
 	pthread_join(tid1,NULL);
 	pthread_join(tid2,NULL);
-	
+
+	printf("--------------------------------\n");
 	lqapply(lqp,print_anything);
+	printf("--------------------------------\n");
 
-	free(car);
-	free(car1);
-	free(arg1);
-	free(arg2);
-	lqclose(lqp);
-
-	if(good_result){
+	car_t *should_be_null=(car_t*)lqget(lqp);
+	
+	
+	if(should_be_null==NULL){
+		free(car);
+		free(car1);
+		free(arg1);
+		free(arg2);
+		lqclose(lqp);
 		exit(EXIT_SUCCESS);
 	}
 	else{
+		free(car);
+		free(car1);
+		free(arg1);
+		free(arg2);
+		lqclose(lqp);
 		exit(EXIT_FAILURE);
 	}
 }
