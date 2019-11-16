@@ -36,4 +36,4 @@ void lqapply(lqueue_t *lqp, void (*fn)(void*elementp));
  */
 void* lqsearch(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp);
 
-void lqsnp(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp);
+void lqsnp(lqueue_t *lqp,void *element, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp);

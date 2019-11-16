@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>
+#include <unistd.h>  
 
 typedef struct ilqueue_t{
   queue_t *queue; 
@@ -25,17 +26,16 @@ typedef struct ilqueue_t{
 /* create an empty locked-queue */
 lqueue_t* lqopen(void){
   ilqueue_t *lqp;
-	pthread_mutex_t mq;
-	
+ 	
 	if(!(lqp=(ilqueue_t *)malloc(sizeof(ilqueue_t)))){
     printf("[Error: malloc failed allocating locked-queue]\n");
     return NULL; 
   }
   
-  pthread_mutex_init(&mq,NULL); //initializes the mutex associated
+   //initializes the mutex associated
 																//with the queue of the lqp
   lqp->queue=qopen();
-  lqp->mutex=mq;
+  pthread_mutex_init(&(lqp->mutex),NULL);
   lqueue_t *lqt=(lqueue_t*)lqp;
   return lqt;
 }
@@ -43,12 +43,13 @@ lqueue_t* lqopen(void){
 /* deallocate a locked-queue, frees everything in it */
 void lqclose(lqueue_t *lqp){
 	ilqueue_t *ilqp=(ilqueue_t*)lqp;
-	pthread_mutex_t m=ilqp->mutex;
-	pthread_mutex_lock(&m);
+	pthread_mutex_lock(&(ilqp->mutex));
 	qclose(ilqp->queue);
-	pthread_mutex_unlock(&m); // function below, pthread_mutex_destroy(),
+	free(ilqp);
+	pthread_mutex_unlock(&(ilqp->mutex)); // function below, pthread_mutex_destroy(),
 	                          // fails if mutex is locked
-	pthread_mutex_destroy(&m); // frees the resources (queue) allocated for mutex
+	pthread_mutex_destroy(&(ilqp->mutex)); // frees the resources (queue) allocated for mutex
+	
 }
 
 /* put element at the end of the locked-queue returns 0 if successful;
@@ -57,10 +58,15 @@ void lqclose(lqueue_t *lqp){
 int32_t lqput(lqueue_t *lqp, void *elementp){
 	int32_t return_value;
   ilqueue_t *ilqp=(ilqueue_t*)lqp;
-  pthread_mutex_t m=ilqp->mutex;
-  pthread_mutex_lock(&m);
+	pthread_mutex_lock(&(ilqp->mutex));
   return_value=qput(ilqp->queue,elementp);
-  pthread_mutex_unlock(&m);
+
+	printf("mutex address:%p",(void*)&(ilqp->mutex));
+	printf("put\n");
+	fflush(stdout);
+	sleep(10);
+	
+  pthread_mutex_unlock(&(ilqp->mutex));
   return return_value;
 }
 
@@ -102,13 +108,14 @@ void* lqsearch(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp)
   return lsearch;
 }
 
-void lqsnp(lqueue_t *lqp, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp){
+//check with the rest of the team
+void lqsnp(lqueue_t *lqp,void *element, bool (*searchfn)(void* elementp, const void* keyp), const void* skeyp){
 	ilqueue_t *ilqp=(ilqueue_t*)lqp;
 	pthread_mutex_t m=ilqp->mutex;
 	pthread_mutex_lock(&m);
 	void* ep=qsearch(ilqp->queue,searchfn,skeyp);
 	if(ep==NULL){
-		qput(ilqp->queue,ep);
+		qput(ilqp->queue,element);
 	}
 	pthread_mutex_unlock(&m);
 }
