@@ -72,9 +72,9 @@ void* lqget(lqueue_t *lqp){
   pthread_mutex_lock(&(ilqp->mutex));
 	ep=qget(ilqp->queue);
 	
-	printf("got \n");
-	fflush(stdout);
-	sleep(10);
+	//printf("got \n");
+	//fflush(stdout);
+	//sleep(10);
 	
   pthread_mutex_unlock(&(ilqp->mutex));
   return ep;

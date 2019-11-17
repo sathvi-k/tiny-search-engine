@@ -1,7 +1,7 @@
 CFLAGS=-Wall -pedantic -std=c11 -I../utils -L../lib -g
 LIBS=-lutils -lcurl
 
-all:	clean pageiotest indexiotest lqtest lqtest1 lqtest2 lqtest3 lqtest4 lqtest5 lhtest
+all:	clean pageiotest indexiotest lqtest lqtest1 lqtest2 lqtest3 lqtest4 lqtest5 lhtest lhtest1 lhtest2 lhtest3 lhtest4
 
 pageiotest:
 						gcc $(CFLAGS) pageiotest.c $(LIBS) -o $@
@@ -30,5 +30,17 @@ lqtest5:
 lhtest:
 						gcc $(CFLAGS) lhtest.c $(LIBS) -o $@
 
+lhtest1:
+						gcc $(CFLAGS) lhtest1.c $(LIBS) -o $@
+
+lhtest2:
+						gcc $(CFLAGS) lhtest2.c $(LIBS) -o $@
+
+lhtest3:
+						gcc $(CFLAGS) lhtest3.c $(LIBS) -o $@ -lpthread
+
+lhtest4:
+						gcc $(CFLAGS) lhtest4.c $(LIBS) -o $@ -lpthread
+
 clean:
-						rm -f pageiotest indexiotest lqtest lqtest1 lqtest2 lqtest3 lqtest4 lqtest5 lhtest
+						rm -f pageiotest indexiotest lqtest lqtest1 lqtest2 lqtest3 lqtest4 lqtest5 lhtest lhtest1 lhtest2 lhtest3 lhtest4

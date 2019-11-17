@@ -22,3 +22,20 @@ echo "lqtest3:"
 valgrind --leak-check=full lqtest3 2> >(grep -i "0 ERRORS")
 valgrind --leak-check=full lqtest3 2> >(grep -i "no leaks")
 
+echo ""
+
+echo "lhtest:"
+valgrind --leak-check=full lhtest 2> >(grep -i "0 ERRORS")
+valgrind --leak-check=full lhtest 2> >(grep -i "no leaks")
+
+echo ""
+
+echo "lhtest1:"
+valgrind --leak-check=full lhtest1 2> >(grep -i "0 ERRORS")
+valgrind --leak-check=full lhtest1 2> >(grep -i "no leaks")
+
+echo ""
+
+echo "lhtest2:"
+valgrind --leak-check=full lhtest2 2> >(grep -i "0 ERRORS")
+valgrind --leak-check=full lhtest2 2> >(grep -i "no leaks")

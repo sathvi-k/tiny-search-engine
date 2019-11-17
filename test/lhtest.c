@@ -79,11 +79,11 @@ int main(void){
 	
 	lhashtable_t *lht = lhopen(5);
 	
-	int32_t res1=lhput(lht,(void*)car,ca,sizeof(*ca));
-	int32_t res2=lhput(lht,(void*)car1,cb,sizeof(*cb));
-	int32_t res3=lhput(lht,(void*)car2,cc,sizeof(*cc));
-	int32_t res4=lhput(lht,(void*)car3,cd,sizeof(*cd));
-	int32_t res5=lhput(lht,(void*)car4,ce,sizeof(*ce));
+	int32_t res1=lhput(lht,(void*)car,ca,strlen(ca));
+	int32_t res2=lhput(lht,(void*)car1,cb,strlen(cb));
+	int32_t res3=lhput(lht,(void*)car2,cc,strlen(cc));
+	int32_t res4=lhput(lht,(void*)car3,cd,strlen(cd));
+	int32_t res5=lhput(lht,(void*)car4,ce,strlen(ce));
 	
 	lhapply(lht,print_anything);
 

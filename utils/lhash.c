@@ -16,6 +16,7 @@
 #include <queue.h>
 #include <lhash.h>
 #include <pthread.h>
+#include <unistd.h>
 
 typedef struct ilhashtable_t{
 	hashtable_t *hash;
@@ -55,6 +56,11 @@ int32_t lhput(lhashtable_t *lhp, void *ep, const char *key, int keylen){
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
 	pthread_mutex_lock(&(ilhp->mutex));
 	return_value=hput(ilhp->hash,ep,key,keylen);
+
+	//printf("put\n");
+	//fflush(stdout);
+	//sleep(10);
+	
 	pthread_mutex_unlock(&(ilhp->mutex));
 	return return_value;
 }
@@ -75,6 +81,11 @@ void *lhsearch(lhashtable_t *lhp, bool (*searchfn)(void* elementp, const void* s
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
 	pthread_mutex_lock(&(ilhp->mutex));
 	void* lsearch=hsearch(ilhp->hash,searchfn,key,keylen);
+
+	//printf("searched\n");
+	//fflush(stdout);
+	//sleep(10);
+	
 	pthread_mutex_unlock(&(ilhp->mutex));
 	return lsearch;
 }
@@ -85,16 +96,21 @@ void *lhget(lhashtable_t *lhp, const char *key, int32_t keylen){
 	ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
 	pthread_mutex_lock(&(ilhp->mutex));
 	void* lget=hqget(ilhp->hash,key,keylen);
+
+	//printf("searched\n");
+	//fflush(stdout);
+	//sleep(10);
+	
 	pthread_mutex_unlock(&(ilhp->mutex));
 	return lget;
 }
 
-void lhsnp(lhashtable_t *lhp,bool (*searchfn)(void* elementp, const void* searchkeyp),const char *key,int32_t keylen){
+void lhsnp(lhashtable_t *lhp,void* element,bool (*searchfn)(void* elementp, const void* searchkeyp),const char *key,int32_t keylen){
   ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
   pthread_mutex_lock(&(ilhp->mutex));  
   void* ep=hsearch(ilhp->hash,searchfn,key,keylen);
 	if(ep==NULL){
-		hput(ilhp->hash,ep,key,keylen);
+		hput(ilhp->hash,element,key,keylen);
 	}
 	pthread_mutex_unlock(&(ilhp->mutex));
 }  

@@ -75,9 +75,10 @@ int main(void){
 	const char *cb = car1->name;
 	const char *cc = car2->name;
 	const char *cd = car3->name;
-	const char *ce = car4->name; 
+	const char *ce = car4->name;
+	const char *cf= "does not exist";
 	
- 	lhashtable_t *lht = lhopen(50);
+	lhashtable_t *lht = lhopen(5);
 	
 	lhput(lht,(void*)car,ca,strlen(ca));
 	lhput(lht,(void*)car1,cb,strlen(cb));
@@ -87,26 +88,14 @@ int main(void){
 	
 	lhapply(lht,print_anything);
 
-	queue_t* got1 = (queue_t*)lhget(lht, ca, strlen(ca));
-	queue_t* got2 = (queue_t*)lhget(lht, cb, strlen(cb));
-	queue_t* got3 = (queue_t*)lhget(lht, cc, strlen(cc));
-	queue_t* got4 = (queue_t*)lhget(lht, cd, strlen(cd));
-	queue_t* got5 = (queue_t*)lhget(lht, ce, strlen(ce));
-
-	printf("---------------------------\n");
-	qapply(got1, print_anything);
-	printf("---------------------------\n");
-	qapply(got2, print_anything);
-	printf("---------------------------\n");
-	qapply(got3, print_anything);
-	printf("---------------------------\n");
-	qapply(got4, print_anything);
-	printf("---------------------------\n");
-	qapply(got5, print_anything);
-	printf("---------------------------\n");
-
+	printf("--------------------------\n");
 	
-	if(got2!=NULL && got3!=NULL && got4!=NULL && got5!=NULL){
+	car_t *searchr=(car_t*)lhsearch(lht,searchfn,cb,strlen(cb));
+	car_t *not_there=(car_t*)lhsearch(lht,searchfn,cf,strlen(cf));
+
+	printf("search result:%s\n",searchr->name);
+	
+	if((strcmp(searchr->name,"Jack")==0) && not_there==NULL){
 		free(car);
 		free(car1);
 		free(car2);
