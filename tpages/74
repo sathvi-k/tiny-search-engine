@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/design/activity.html
+https://thayer.github.io/engs50/Notes/bugs/activity.html
 3
-6112
+5717
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/design/activity.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Activity - C preprocessor</title>
+  <title>Activity - Mid-term feedback</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/design/activity.html">
+  <link rel="canonical" href="/engs50/Notes/bugs/activity.html">
 </head>
 
 
@@ -44,141 +44,87 @@ https://thayer.github.io/engs50/Notes/design/activity.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Activity - C preprocessor</h1>
+    <h1 class="post-title">Activity - Mid-term feedback</h1>
   </header>
 
   <div class="post-content">
     <h3 id="goals">Goals</h3>
 
 <ul>
-  <li>to use the C preprocessor</li>
-  <li>to understand when linker might produce errors.</li>
+  <li>for students to identify how they can help improve their own learning</li>
+  <li>for students to identify how they can help their group learn</li>
+  <li>for the professor to identify how he can help students learn</li>
 </ul>
 
 <h2 id="activity">Activity</h2>
 
-<p>Examine the source files in <a href="/engs50/Examples/seuss">~cs50/examples/seuss</a>, shown below.</p>
+<p>We discuss the feedback from the mid-term survey conducted by DCAL and the Instructional team.
+Below are a few of the themes that came through loud and clear:</p>
 
-<ol>
-  <li>Try to compile the program.
-Why do you get an error?
-is it the compiler or linker reporting the error?
-what could you do to fix it?</li>
-  <li>Run <code class="highlighter-rouge">gcc -E seuss.c</code>, which runs the <em>C preprocessor</em> only; this output is what the compiler would consume.
-Look at the output; ignore the <code class="highlighter-rouge">#</code> lines, which are annotations to help the compiler produce error messages that reference the original file name and line number.
-Notice how the preprocessor has copied everything from the include files right into the input, at the point where they are included in <code class="highlighter-rouge">seuss.c</code>, and then stripped out all the comments.</li>
-  <li>After class, re-read the <a href="/makefiles/preprocessor.html">Lecture extra about the C preprocessor</a>.</li>
-</ol>
+<h3 id="things-we-do-well">Things we do well</h3>
 
-<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="cm">/* seuss.c - uses thing one and thing two. */</span>
+<ul>
+  <li>we compliment each other; we respect each other</li>
+  <li>we <em>work together</em> to <em>learn together</em></li>
+  <li>we all contribute to understanding the task, understanding the material, and devising a solution</li>
+  <li>we rotate partners and the ‘point person’ on activities</li>
+  <li>we explain difficult concepts to others in our group</li>
+  <li>we ask each other questions when we need help</li>
+  <li>we ask questions to help guide others toward understanding</li>
+  <li>we ask our Learning Fellow when we get stuck</li>
+  <li>where we have different levels of experience, the more-experienced help the less-experienced.</li>
+</ul>
 
-<span class="cp">#include "one.h"
-#include "two.h"
-</span>
-<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
-<span class="p">{</span>
-  <span class="kt">int</span> <span class="n">fun</span> <span class="o">=</span> <span class="n">thing_one</span><span class="p">()</span> <span class="o">+</span> <span class="n">thing_two</span><span class="p">();</span>
-  <span class="k">return</span> <span class="n">fun</span><span class="p">;</span> <span class="c1">// exit status
-</span><span class="p">}</span>
-</code></pre></div></div>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* one.h */
+<h3 id="things-students-can-do">Things students can do</h3>
 
-int one = 1;
-extern int thing_one(void);
-</code></pre></div></div>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* two.h */
+<ul>
+  <li>I can pay more attention in lecture, and be ready to engage with the group activity</li>
+  <li>I can attend regularly - and be part of my group</li>
+  <li>I can participate more in my group activity</li>
+  <li>I can encourage my group to work together rather than independently</li>
+  <li>I can encourage each member to actively contribute</li>
+  <li>I can rotate partners with whom I work</li>
+  <li>I can encourage my group to rotate the ‘point person’ on activities</li>
+  <li>I can ask more questions to help others understand the activity or the material</li>
+  <li>I can make sure everyone’s voice is heard</li>
+  <li>I can create a groupme, slack, or other chat group to encourage group communication outside class</li>
+  <li>I can get to know my team better - get together outside class</li>
+  <li>I can read the lecture notes and labs more carefully</li>
+  <li>I can help everyone by contributing answers on Piazza</li>
+</ul>
 
-int two = 2;
-extern int thing_two(void);
-</code></pre></div></div>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* one.c */
+<h3 id="things-the-professor-can-do">Things the professor can do</h3>
 
-#include "one.h"
+<ul>
+  <li>he can clarify opportunities for help outside class</li>
+  <li>he can vary how he conveys concepts in lecture: whiteboard work, live-coding programs, finished programs, in-class activities</li>
+  <li>he can choose better (more interesting) examples</li>
+  <li>he can explain pointers more clearly</li>
+  <li>he can <em>slow down</em> the pace</li>
+  <li>he can <em>speed up</em> the pace</li>
+  <li>he can spend <em>more</em> time on in-class activities</li>
+  <li>he can spend <em>less</em> time on in-class activities</li>
+  <li>he can provide solutions to in-class activities</li>
+  <li>he can ensure the lectures (and notes) cover everything needed for the labs</li>
+  <li>he can streamline the lecture material - avoid ‘lecture extras’</li>
+  <li>he can clarify the expectations for each lab</li>
+  <li>he can ensure faster turnaround on lab grades/feedback</li>
+  <li>he can ensure section leaders are better prepared for sections</li>
+  <li>he can reconsider the policies on attendance and assigned seating</li>
+  <li>he can reconsider the assigment of groups at start of term</li>
+</ul>
 
-int thing_one(void)
-{
-  return one;
-}
-</code></pre></div></div>
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/* two.c */
+<h3 id="other-observations">Other observations</h3>
 
-#include "two.h"
+<ul>
+  <li>the classroom furniture arrangement is not conducive to lecture</li>
+  <li>in-class activities are helpful to some students</li>
+  <li>out-of-class coding is how students learn best</li>
+</ul>
 
-int thing_two(void)
-{
-  return two;
-}
-</code></pre></div></div>
+<p><img src="pace-graph.png" alt="" /></p>
 
-<!--
-## Solution
-
-When you compile the program:
-
-```bash
-[cs50@flume ~/demo/seuss1]$ mygcc -c one.c
-[cs50@flume ~/demo/seuss1]$ mygcc -c two.c
-[cs50@flume ~/demo/seuss1]$ mygcc -c seuss.c
-[cs50@flume ~/demo/seuss1]$ mygcc seuss.o one.o two.o -o seuss
-one.o:(.data+0x0): multiple definition of `one'
-seuss.o:(.data+0x0): first defined here
-two.o:(.data+0x0): multiple definition of `two'
-seuss.o:/net/class/cs50/demo/seuss1/seuss.c:7: first defined here
-collect2: error: ld returned 1 exit status
-```
-
-The linker `ld` complains because the global variables `one` and `two` are multiply defined.
-This happens because the variables are defined (not just declared) in the respective `.h` files, and those `.h` files are included in the respective `.c` files *and* in `seuss.c`.
-
-The solution is to move those global variables out of the `.h` file into the respective `.c` files.
-They are only used in those files, anyway, so they should further be marked `static` (so they are invisible outside the file in which they are defined).
-Thus,
-
-```c
-/* seuss.c - uses thing one and thing two. */
-
-#include "one.h"
-#include "two.h"
-
-int main()
-{
-  int fun = thing_one() + thing_two();
-  return fun; // exit status
-}
-```
-```
-/* one.h */
-
-extern int thing_one(void);
-```
-```
-/* two.h */
-
-extern int thing_two(void);
-```
-```
-/* one.c */
-
-#include "one.h"
-static int one = 1;  // this line moved and made static
-
-int thing_one(void)
-{
-  return one;
-}
-```
-```
-/* two.c */
-
-#include "two.h"
-static int two = 2;  // this line moved and made static
-
-int thing_two(void)
-{
-  return two;
-}
-```
--->
+<p><img src="balance-graph.png" alt="" /></p>
 
   </div>
 

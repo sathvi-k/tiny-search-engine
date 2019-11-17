@@ -19,6 +19,8 @@
 #include <sys/stat.h>
 #include <pthread.h>
 
+int number_of_done=0;
+
 typedef struct arguments{
 	lqueue_t *queue;
   lhashtable_t *hashtable;
@@ -27,9 +29,10 @@ typedef struct arguments{
 	char *pagedir;
   bool (*searchfn)(void* elementp,const void* searchkeyp);
 	pthread_mutex_t mutex;
+	int threadcount;
 }arguments_t;  
 
-arguments_t* make_argument(lqueue_t *queue,lhashtable_t *hashtable,int maxdepth,int id,char *pagedir,bool (*searchfn)(void* elementp,const void*searchkeyp)){
+arguments_t* make_argument(lqueue_t *queue,lhashtable_t *hashtable,int maxdepth,int id,char *pagedir,bool (*searchfn)(void* elementp,const void*searchkeyp),int threadcount){
   arguments_t *arg;
   if(!(arg=(arguments_t*)malloc(sizeof(arguments_t)))){
     printf("[Error: malloc failed allocating argument_t]\n");
@@ -42,6 +45,7 @@ arguments_t* make_argument(lqueue_t *queue,lhashtable_t *hashtable,int maxdepth,
 	arg->pagedir=pagedir;
   arg->searchfn=searchfn;
   pthread_mutex_init(&(arg->mutex),NULL);
+	arg->threadcount=threadcount;
   return arg;
 }                   
 
@@ -106,44 +110,58 @@ void* crawl_page(void* arg){
 	arguments_t *argt=(arguments_t*)arg;
 	
 	webpage_t *page;
-	
-	while((page=lqget(argt->queue))!=NULL){
-		if(webpage_fetch(page)){
-			//check if depth exceeds the max depth if not carry on
-			if(webpage_getDepth(page)<=(argt->maxdepth)){
-				
-				pthread_mutex_lock(&(argt->mutex));
-				
-				pagesave(page,argt->id,argt->pagedir);
-				printf(".");
-				fflush(stdout);
 
-				argt->id=(argt->id)+1;
+	while(number_of_done<argt->threadcount){
+		if((page=lqget(argt->queue))!=NULL){
+
+			if(number_of_done>0){
+				pthread_mutex_lock(&(argt->mutex));
+				number_of_done--;
 				pthread_mutex_unlock(&(argt->mutex));
-				
-				int pos = 0;
-				char *result;
-				webpage_t* inter_page=NULL;
-				
-				while((pos=webpage_getNextURL(page,pos,&result)) > 0){
-					if(IsInternalURL(result)){
-						inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
-						//printf("Found internal url: %s\n",result);
-						if(lhsnp(argt->hashtable,(void*)inter_page,argt->searchfn,result,strlen(result))==0){
-							lqput(argt->queue,(void*)inter_page);
+			}
+			
+			if(webpage_fetch(page)){
+				//check if depth exceeds the max depth if not carry on
+				if(webpage_getDepth(page)<=(argt->maxdepth)){
+					
+					pthread_mutex_lock(&(argt->mutex));
+					
+					pagesave(page,argt->id,argt->pagedir);
+					printf(".");
+					fflush(stdout);
+					
+					argt->id=(argt->id)+1;
+					pthread_mutex_unlock(&(argt->mutex));
+					
+					int pos = 0;
+					char *result;
+					webpage_t* inter_page=NULL;
+					
+					while((pos=webpage_getNextURL(page,pos,&result)) > 0){
+						if(IsInternalURL(result)){
+							inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
+							//printf("Found internal url: %s\n",result);
+							if(lhsnp(argt->hashtable,(void*)inter_page,argt->searchfn,result,strlen(result))==0){
+								lqput(argt->queue,(void*)inter_page);
+							}
+							else{
+								webpage_delete(inter_page);
+								inter_page=NULL;
+							}
+						}                         
+						else{                           
+							//printf("Found external url: %s\n", result);
 						}
-						else{
-							webpage_delete(inter_page);
-							inter_page=NULL;
-						}
-					}                         
-					else{                           
-						//printf("Found external url: %s\n", result);
+						free(result);
+						result=NULL;
 					}
-					free(result);
-					result=NULL;
 				}
 			}
+		}
+		else{
+			pthread_mutex_lock(&(argt->mutex));
+			number_of_done++;
+			pthread_mutex_unlock(&(argt->mutex));
 		}
 	}
 	return NULL;
@@ -174,19 +192,16 @@ int main(int argc,char *argv[]){
 			lhput(urlH,(void*)page,url,strlen(url));
 			lqput(webq,(void*)page);
 
-			arguments_t *argument=make_argument(webq,urlH,maxdepth,id,pagedir,searchfn);
+			arguments_t *argument=make_argument(webq,urlH,maxdepth,id,pagedir,searchfn,threadcount);
 			
 			int i;
 			pthread_t tid[threadcount];
 			
-			pthread_create(&tid[0],NULL,crawl_page,(void*)argument);
-			pthread_join(tid[0],NULL);
-			
-			for(i=1; i<threadcount;i++){
+			for(i=0;i<threadcount;i++){
 				pthread_create(&tid[i],NULL,crawl_page,(void*)argument);
 			}
 			
-			for(i=1;i<threadcount;i++){
+			for(i=0;i<threadcount;i++){
 				pthread_join(tid[i],NULL);
 			}
 					

@@ -110,7 +110,7 @@ void t1(arguments_t *arg,void*(*put)(void* arg)){
 }
 
 void t2(arguments_t *arg,void*(*put)(void* arg)){
-	sleep(2);
+	//sleep(2);
 	pthread_create(&tid2,NULL,put,(void*)arg);
 }
 

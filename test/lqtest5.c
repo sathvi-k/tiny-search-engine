@@ -95,7 +95,7 @@ void t1(arguments_t *arg,void*(*get)(void* arg)){
 }
 
 void t2(arguments_t *arg,void*(*get)(void* arg)){
-	sleep(2);
+	//sleep(2);
 	pthread_create(&tid2,NULL,get,(void*)arg);
 }
 

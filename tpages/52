@@ -1,6 +1,6 @@
-https://thayer.github.io/engs50/Notes/bash2/activity.html
+https://thayer.github.io/engs50/Notes/c2/activity.html
 3
-3206
+7378
 <!DOCTYPE html>
 <html>
 
@@ -9,13 +9,13 @@ https://thayer.github.io/engs50/Notes/bash2/activity.html
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Activity - shell pipelines</title>
+  <title>Activity - strings are arrays</title>
   <meta name="description" content="In Engs 50 you will learn how to design & build large, reliable, maintainable, and understandable software systems.  In the process you will learn to program in C with Unix development tools.
 ">
 
   <link rel="shortcut icon" href="/engs50/50.png" />
   <link rel="stylesheet" href="/engs50/css/main.css">
-  <link rel="canonical" href="/engs50/Notes/bash2/activity.html">
+  <link rel="canonical" href="/engs50/Notes/c2/activity.html">
 </head>
 
 
@@ -44,41 +44,71 @@ https://thayer.github.io/engs50/Notes/bash2/activity.html
         <article class="post">
 
   <header class="post-header">
-    <h1 class="post-title">Activity - shell pipelines</h1>
+    <h1 class="post-title">Activity - strings are arrays</h1>
   </header>
 
   <div class="post-content">
-    <h2 id="billboard-hot-100-2016">Billboard Hot 100 (2016)</h2>
+    <p>In C, a string is actually an array of characters, which (by convention) is terminated by a null (<code class="highlighter-rouge">\0</code>) character.</p>
 
-<p>Let’s play with the <a href="http://www.billboard.com/charts/year-end/2016/hot-100-songs">Billboard Hot 100 from 2016</a>, which I extracted into a text file.</p>
+<p>Examine this program, in <code class="highlighter-rouge">overflow.c</code>:</p>
 
-<p>Write pipelines to find out</p>
+<div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">...</span>
+<span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="kt">int</span> <span class="n">buflen</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+  <span class="kt">char</span> <span class="n">buf1</span><span class="p">[</span><span class="n">buflen</span><span class="p">];</span>
+  <span class="kt">char</span> <span class="n">buf2</span><span class="p">[</span><span class="n">buflen</span><span class="p">];</span>
+  <span class="kt">int</span> <span class="n">example</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
 
-<ol>
-  <li>sort the list to start at 100 and countdown to 1</li>
-  <li>how many song titles mention ``love’’?</li>
-  <li>how many artists are in the top 100?</li>
-  <li>which artist had the most hits in top 100?</li>
-</ol>
+  <span class="n">printf</span><span class="p">(</span><span class="s">"%d: buf1='%s', buf2='%s'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">example</span><span class="o">++</span><span class="p">,</span> <span class="n">buf1</span><span class="p">,</span> <span class="n">buf2</span><span class="p">);</span>
 
-<p>Some useful commands:</p>
+  <span class="c1">// assign a constant to each buffer
+</span>  <span class="n">strcpy</span><span class="p">(</span><span class="n">buf1</span><span class="p">,</span> <span class="s">"hello"</span><span class="p">);</span>  <span class="c1">// like buf1 = "hello"
+</span>  <span class="n">printf</span><span class="p">(</span><span class="s">"%d: buf1='%s', buf2='%s'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">example</span><span class="o">++</span><span class="p">,</span> <span class="n">buf1</span><span class="p">,</span> <span class="n">buf2</span><span class="p">);</span>
 
-<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">$ BB</span><span class="o">=</span>~cs50/public_html/Lectures/bash2/Billboard2016-hot100.txt
-<span class="nv">$ </span>less <span class="nv">$BB</span>
-<span class="nv">$ </span>cut <span class="nt">-d</span> : <span class="nt">-f</span> 3 <span class="nv">$BB</span> | less
-<span class="nv">$ </span>wc <span class="nt">-l</span> <span class="nv">$BB</span>
+  <span class="n">strcpy</span><span class="p">(</span><span class="n">buf2</span><span class="p">,</span> <span class="s">"class!"</span><span class="p">);</span>  <span class="c1">// like buf2 = "class!"
+</span>  <span class="n">printf</span><span class="p">(</span><span class="s">"%d: buf1='%s', buf2='%s'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">example</span><span class="o">++</span><span class="p">,</span> <span class="n">buf1</span><span class="p">,</span> <span class="n">buf2</span><span class="p">);</span>
+
+  <span class="c1">// assign a longer constant to each buffer
+</span>  <span class="n">strcpy</span><span class="p">(</span><span class="n">buf1</span><span class="p">,</span> <span class="s">"hellohellohello"</span><span class="p">);</span> <span class="c1">// 15 characters
+</span>  <span class="n">printf</span><span class="p">(</span><span class="s">"%d: buf1='%s', buf2='%s'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">example</span><span class="o">++</span><span class="p">,</span> <span class="n">buf1</span><span class="p">,</span> <span class="n">buf2</span><span class="p">);</span>
+
+  <span class="n">strcpy</span><span class="p">(</span><span class="n">buf2</span><span class="p">,</span> <span class="s">"class!class!class!"</span><span class="p">);</span>  <span class="c1">// 18 characters
+</span>  <span class="n">printf</span><span class="p">(</span><span class="s">"%d: buf1='%s', buf2='%s'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">example</span><span class="o">++</span><span class="p">,</span> <span class="n">buf1</span><span class="p">,</span> <span class="n">buf2</span><span class="p">);</span>
+
+  <span class="n">putchar</span> <span class="p">(</span><span class="sc">'\n'</span><span class="p">);</span>
+  <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">buflen</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">"buf1[%d] = '%c'</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">buf1</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
 </code></pre></div></div>
 
-<!--
-### solutions
+<p>Explain its output, below, which may not be what you expected!</p>
 
-```bash
-1. sort -nr $BB
-2. cut -d : -f 2 $BB | grep -i love | wc -l
-3. cut -d : -f 3 $BB | sort -u | wc -l
-4. cut -d : -f 3 $BB | sort | uniq -c | sort -nr | head
-```
--->
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>0: buf1=W?P?', buf2='?V?P?'
+1: buf1='hello', buf2='?V?P?'
+2: buf1='hello', buf2='class!'
+3: buf1='hellohellohello', buf2='class!'
+4: buf1='s!', buf2='class!class!class!'
+
+buf1[0] = 's'
+buf1[1] = '!'
+buf1[2] = ''
+buf1[3] = 'l'
+buf1[4] = 'o'
+buf1[5] = 'h'
+buf1[6] = 'e'
+buf1[7] = 'l'
+buf1[8] = 'l'
+buf1[9] = 'o'
+buf1[10] = 'h'
+buf1[11] = 'e'
+buf1[12] = 'l'
+buf1[13] = 'l'
+buf1[14] = 'o'
+buf1[15] = ''
+</code></pre></div></div>
 
   </div>
 
