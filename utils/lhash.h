@@ -38,4 +38,4 @@ void *lhsearch(lhashtable_t *lhp, bool (*searchfn)(void* elementp, const void* s
  * If the key does not exist, returns NULL */
 void *lhget(lhashtable_t *lhp, const char *key, int32_t keylen);
 
-void lhsnp(lhashtable_t *lhp,bool (*searchfn)(void* elementp, const void* searchkeyp),const char *key,int32_t keylen);
+int32_t lhsnp(lhashtable_t *lhp,void* element,bool (*searchfn)(void* elementp, const void* searchkeyp),const char *key,int32_t keylen);

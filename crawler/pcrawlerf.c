@@ -17,34 +17,32 @@
 #include <lhash.h>
 #include <webpage.h>
 #include <sys/stat.h>
+#include <pthread.h>
 
 typedef struct arguments{
 	lqueue_t *queue;
   lhashtable_t *hashtable;
 	int maxdepth;
 	int id;
-	char *pagedir;                                                                                                                   
+	char *pagedir;
   bool (*searchfn)(void* elementp,const void* searchkeyp);
 	pthread_mutex_t mutex;
 }arguments_t;  
 
-arguments_t* make_argument(lqueue_t *queue,lhashtable_t *hashtable,int maxdepth,int id,char *pagedir,bool (*searchfn)(void* elementp,const void*searchkeyp)){                         
-                                                                                
-  arguments_t *arg;                                                             
-  if(!(arg=(arguments_t*)malloc(sizeof(arguments_t)))){                         
-    printf("[Error: malloc failed allocating argument_t]\n");                   
-    return NULL;                                                                
-  }                                                                             
-
+arguments_t* make_argument(lqueue_t *queue,lhashtable_t *hashtable,int maxdepth,int id,char *pagedir,bool (*searchfn)(void* elementp,const void*searchkeyp)){
+  arguments_t *arg;
+  if(!(arg=(arguments_t*)malloc(sizeof(arguments_t)))){
+    printf("[Error: malloc failed allocating argument_t]\n");
+    return NULL;
+  }
 	arg->queue=queue;
-  arg->hashtable=hashtable;                                                     
-  arg->maxdepth=maxdepth;                                                         
+  arg->hashtable=hashtable;
+  arg->maxdepth=maxdepth;
   arg->id=id;
 	arg->pagedir=pagedir;
-  arg->searchfn=searchfn;                                                       
+  arg->searchfn=searchfn;
   pthread_mutex_init(&(arg->mutex),NULL);
-	
-  return arg;                                                                   
+  return arg;
 }                   
 
 void print_anything(void *elementp){                                       
@@ -107,6 +105,8 @@ void* crawl_page(void* arg){
 	
 	arguments_t *argt=(arguments_t*)arg;
 	
+	webpage_t *page;
+	
 	while((page=lqget(argt->queue))!=NULL){
 		if(webpage_fetch(page)){
 			//check if depth exceeds the max depth if not carry on
@@ -118,7 +118,7 @@ void* crawl_page(void* arg){
 				printf(".");
 				fflush(stdout);
 
-				id=id+1;
+				argt->id=(argt->id)+1;
 				pthread_mutex_unlock(&(argt->mutex));
 				
 				int pos = 0;
@@ -128,25 +128,25 @@ void* crawl_page(void* arg){
 				while((pos=webpage_getNextURL(page,pos,&result)) > 0){
 					if(IsInternalURL(result)){
 						inter_page=webpage_new(result,(webpage_getDepth(page))+1, NULL);
-						//printf("Found internal url: %s\n",hurl);
-						if(lhsearch(argt->hashtable,argt->searchfn,result,strlen(result))==NULL){
-							lhput(argt->hashtable,(void*)inter_page,result,strlen(result));
+						//printf("Found internal url: %s\n",result);
+						if(lhsnp(argt->hashtable,(void*)inter_page,argt->searchfn,result,strlen(result))==0){
 							lqput(argt->queue,(void*)inter_page);
 						}
 						else{
 							webpage_delete(inter_page);
 							inter_page=NULL;
 						}
-					}                                                                                                            
-					else{                                                                                                        
-						//	printf("Found external url: %s\n", result);
+					}                         
+					else{                           
+						//printf("Found external url: %s\n", result);
 					}
 					free(result);
 					result=NULL;
 				}
 			}
 		}
-	}	
+	}
+	return NULL;
 }
 
 int main(int argc,char *argv[]){
@@ -165,7 +165,7 @@ int main(int argc,char *argv[]){
 		//check if provided depth is greater than or equal to 1
 		if(maxdepth>=0){
 			
-			lqueue_t *webq=lqopen();                                                   
+			lqueue_t *webq=lqopen();
 			lhashtable_t *urlH=lhopen(20);
 			
 			// create webpage, put it in a queue and the URL in hash
@@ -179,15 +179,20 @@ int main(int argc,char *argv[]){
 			int i;
 			pthread_t tid[threadcount];
 			
-			for(i=0; i<threadcount;i++){
+			pthread_create(&tid[0],NULL,crawl_page,(void*)argument);
+			pthread_join(tid[0],NULL);
+			
+			for(i=1; i<threadcount;i++){
 				pthread_create(&tid[i],NULL,crawl_page,(void*)argument);
 			}
 			
-			for(i=0;i<threadcount;i++){
+			for(i=1;i<threadcount;i++){
 				pthread_join(tid[i],NULL);
 			}
 					
 			printf("\n");
+			pthread_mutex_destroy(&(argument->mutex));
+			free(argument);
 			lqclose(webq);
 			lhapply(urlH,webpage_delete);
 			lhclose(urlH);
@@ -199,7 +204,7 @@ int main(int argc,char *argv[]){
 		}
 	}
 	else{
-		printf("Usage:crawlerf <seedurl> <pagedir> <maxdepth> <numberofthreads>\n");
+		printf("Usage:pcrawlerf <seedurl> <pagedir> <maxdepth> <numberofthreads>\n");
 		exit(EXIT_FAILURE);
 	}
 }

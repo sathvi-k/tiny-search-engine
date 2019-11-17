@@ -104,15 +104,20 @@ void *lhget(lhashtable_t *lhp, const char *key, int32_t keylen){
 	pthread_mutex_unlock(&(ilhp->mutex));
 	return lget;
 }
-
-void lhsnp(lhashtable_t *lhp,void* element,bool (*searchfn)(void* elementp, const void* searchkeyp),const char *key,int32_t keylen){
+int32_t lhsnp(lhashtable_t *lhp,void* element,bool (*searchfn)(void* elementp, const void* searchkeyp),const char *key,int32_t keylen){
   ilhashtable_t *ilhp=(ilhashtable_t*)lhp;
   pthread_mutex_lock(&(ilhp->mutex));  
   void* ep=hsearch(ilhp->hash,searchfn,key,keylen);
+	
 	if(ep==NULL){
 		hput(ilhp->hash,element,key,keylen);
+		pthread_mutex_unlock(&(ilhp->mutex));
+		return 0;
 	}
-	pthread_mutex_unlock(&(ilhp->mutex));
+	else{
+		pthread_mutex_unlock(&(ilhp->mutex));
+		return 1;
+	}
 }  
 
 

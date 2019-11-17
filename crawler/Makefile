@@ -1,7 +1,7 @@
 CFLAGS=-Wall -pedantic -std=c11 -I../utils -L../lib -g
 LIBS=-lutils -lcurl
 
-all: clean crawler crawler3 crawler4 crawler5 crawlerf
+all: clean crawler crawler3 crawler4 crawler5 crawlerf pcrawlerf
 
 crawler:
 				gcc $(CFLAGS) crawler.c $(LIBS) -o $@
@@ -18,6 +18,8 @@ crawler5:
 crawlerf:
 				gcc $(CFLAGS) crawlerf.c $(LIBS) -o $@
 
+pcrawlerf:
+				gcc $(CFLAGS) pcrawlerf.c $(LIBS) -o $@ -lpthread
 
 run2:
 				rm -f ../pages/*
@@ -28,4 +30,4 @@ grind2:
 				valgrind --leak-check=full ./crawlerf https://thayer.github.io/engs50/ pages 2 
 
 clean:
-				rm -f crawler crawler3 crawler4 crawler5 crawlerf
+				rm -f crawler crawler3 crawler4 crawler5 crawlerf pcrawlerf
