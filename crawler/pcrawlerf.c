@@ -106,7 +106,7 @@ int32_t pagesave(webpage_t *pagep, int id, char *dirname) {
 }
 
 void* crawl_page(void* arg){
-	
+	bool was_empty=false;
 	arguments_t *argt=(arguments_t*)arg;
 	
 	webpage_t *page;
@@ -114,9 +114,13 @@ void* crawl_page(void* arg){
 	while(number_of_done<argt->threadcount){
 		if((page=lqget(argt->queue))!=NULL){
 
-			if(number_of_done>0){
+			if(was_empty==false){
+				;
+			}
+			else{
 				pthread_mutex_lock(&(argt->mutex));
 				number_of_done--;
+				was_empty=false;
 				pthread_mutex_unlock(&(argt->mutex));
 			}
 			
@@ -159,9 +163,15 @@ void* crawl_page(void* arg){
 			}
 		}
 		else{
-			pthread_mutex_lock(&(argt->mutex));
-			number_of_done++;
-			pthread_mutex_unlock(&(argt->mutex));
+			if(was_empty){
+				;
+			}
+			else{
+				pthread_mutex_lock(&(argt->mutex));
+				number_of_done++;
+				was_empty=true;
+				pthread_mutex_unlock(&(argt->mutex));
+			}
 		}
 	}
 	return NULL;
